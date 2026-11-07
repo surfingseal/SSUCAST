@@ -74,6 +74,9 @@ func Project(v model.Content, year int, now time.Time) (model.NoticePolicy, erro
 	p := model.NoticePolicy{Version: Version, Year: year, YearBasis: "explicit_user_current_year_assumption", ContentHash: v.ContentHash, InputHash: v.ScheduleInputHash, AnalysisID: v.ScheduleAnalysisID, AppliedAt: now.UTC(), Schedules: rows, ExpiryReason: "no_confirmed_application_deadline"}
 	for i := range rows {
 		s := &rows[i]
+		if len(s.ImageEvidence) > 0 {
+			continue
+		} // Image years require visible image evidence; never apply text-year assumption.
 		filled := 0
 		for j, partial := range []*model.CalendarParts{s.StartPartial, s.EndPartial} {
 			if partial == nil || partial.Year != nil {

@@ -106,27 +106,30 @@ type Metadata struct {
 	VisibleCount int64      `json:"visible_count"`
 }
 type Schedule struct {
-	YearAssumed        bool                 `json:"year_assumed"`
-	ID                 string               `json:"id"`
-	ParentID           *string              `json:"parent_id"`
-	Type               string               `json:"type"`
-	Label              string               `json:"label"`
-	StartDate, EndDate *string              `json:"-"`
-	StartTime, EndTime *string              `json:"-"`
-	StartPartial       *model.CalendarParts `json:"start_partial"`
-	EndPartial         *model.CalendarParts `json:"end_partial"`
-	Timezone           string               `json:"timezone"`
-	Precision          string               `json:"precision"`
-	Scope              *string              `json:"scope"`
-	Evidence           string               `json:"evidence"`
-	Spans              []model.SourceSpan   `json:"evidence_spans,omitempty"`
-	Review             bool                 `json:"review_required"`
-	Reasons            []string             `json:"review_reasons"`
-	Quality            string               `json:"quality"`
-	State              string               `json:"state"`
-	StartLabel         string               `json:"start_label"`
-	EndLabel           string               `json:"end_label"`
-	Dates              DateFields           `json:"dates"`
+	Origin             string                `json:"origin"`
+	ImageDerived       bool                  `json:"image_derived"`
+	ImageEvidence      []model.ImageEvidence `json:"image_evidence,omitempty"`
+	YearAssumed        bool                  `json:"year_assumed"`
+	ID                 string                `json:"id"`
+	ParentID           *string               `json:"parent_id"`
+	Type               string                `json:"type"`
+	Label              string                `json:"label"`
+	StartDate, EndDate *string               `json:"-"`
+	StartTime, EndTime *string               `json:"-"`
+	StartPartial       *model.CalendarParts  `json:"start_partial"`
+	EndPartial         *model.CalendarParts  `json:"end_partial"`
+	Timezone           string                `json:"timezone"`
+	Precision          string                `json:"precision"`
+	Scope              *string               `json:"scope"`
+	Evidence           string                `json:"evidence"`
+	Spans              []model.SourceSpan    `json:"evidence_spans,omitempty"`
+	Review             bool                  `json:"review_required"`
+	Reasons            []string              `json:"review_reasons"`
+	Quality            string                `json:"quality"`
+	State              string                `json:"state"`
+	StartLabel         string                `json:"start_label"`
+	EndLabel           string                `json:"end_label"`
+	Dates              DateFields            `json:"dates"`
 }
 type DateFields struct {
 	StartPrecision string  `json:"start_precision"`
@@ -137,23 +140,28 @@ type DateFields struct {
 	EndTime        *string `json:"end_time"`
 }
 type Notice struct {
-	ID             string     `json:"id"`
-	Title          string     `json:"title"`
-	Summary        string     `json:"summary"`
-	Content        string     `json:"content,omitempty"`
-	Source         string     `json:"source"`
-	Category       string     `json:"category"`
-	Categories     []string   `json:"categories"`
-	CategoryMethod string     `json:"category_method"`
-	PublishedAt    *time.Time `json:"published_at"`
-	OriginalURL    string     `json:"original_url"`
-	Status         string     `json:"status"`
-	Analyzed       bool       `json:"analyzed"`
-	Review         bool       `json:"review_required"`
-	SummaryReview  bool       `json:"summary_review_required"`
-	Audience       *string    `json:"target_audience"`
-	AudienceReview bool       `json:"audience_review_required"`
-	Schedules      []Schedule `json:"schedules"`
+	TimingReview       *TimingReview `json:"timing_review,omitempty"`
+	reviewContentHash  string
+	reviewAnalysisID   string
+	ImageAnalysisUsed  bool       `json:"image_analysis_used"`
+	ImageScheduleCount int        `json:"image_schedule_count"`
+	ID                 string     `json:"id"`
+	Title              string     `json:"title"`
+	Summary            string     `json:"summary"`
+	Content            string     `json:"content,omitempty"`
+	Source             string     `json:"source"`
+	Category           string     `json:"category"`
+	Categories         []string   `json:"categories"`
+	CategoryMethod     string     `json:"category_method"`
+	PublishedAt        *time.Time `json:"published_at"`
+	OriginalURL        string     `json:"original_url"`
+	Status             string     `json:"status"`
+	Analyzed           bool       `json:"analyzed"`
+	Review             bool       `json:"review_required"`
+	SummaryReview      bool       `json:"summary_review_required"`
+	Audience           *string    `json:"target_audience"`
+	AudienceReview     bool       `json:"audience_review_required"`
+	Schedules          []Schedule `json:"schedules"`
 }
 type Page struct {
 	Items []Notice  `json:"items"`
@@ -260,11 +268,15 @@ func ScheduleView(s model.Schedule, now time.Time) Schedule {
 			}
 		}
 	}
-	return Schedule{YearAssumed: noticepolicy.IsYearAssumed(s), ID: s.ID, ParentID: s.ParentID, Type: s.Type, Label: s.Label, StartPartial: s.StartPartial, EndPartial: s.EndPartial, Timezone: s.Timezone, Precision: s.Precision, Scope: s.Scope, Evidence: s.Evidence, Spans: s.EvidenceSpans, Review: review, Reasons: s.ReviewReasons, Quality: quality, State: state, StartLabel: dateLabel(s.StartDate, s.StartTime, s.StartPartial), EndLabel: dateLabel(s.EndDate, s.EndTime, s.EndPartial), Dates: DateFields{StartPrecision: s.StartPrecision, EndPrecision: s.EndPrecision, StartDate: s.StartDate, EndDate: s.EndDate, StartTime: s.StartTime, EndTime: s.EndTime}}
+	evidence := append([]model.ImageEvidence{}, s.ImageEvidence...)
+	for i := range evidence {
+		evidence[i].ImageURL = SafeURL(evidence[i].ImageURL)
+	}
+	return Schedule{Origin: s.Origin, ImageDerived: len(s.ImageEvidence) > 0, ImageEvidence: evidence, YearAssumed: noticepolicy.IsYearAssumed(s), ID: s.ID, ParentID: s.ParentID, Type: s.Type, Label: s.Label, StartPartial: s.StartPartial, EndPartial: s.EndPartial, Timezone: s.Timezone, Precision: s.Precision, Scope: s.Scope, Evidence: s.Evidence, Spans: s.EvidenceSpans, Review: review, Reasons: s.ReviewReasons, Quality: quality, State: state, StartLabel: dateLabel(s.StartDate, s.StartTime, s.StartPartial), EndLabel: dateLabel(s.EndDate, s.EndTime, s.EndPartial), Dates: DateFields{StartPrecision: s.StartPrecision, EndPrecision: s.EndPrecision, StartDate: s.StartDate, EndDate: s.EndDate, StartTime: s.StartTime, EndTime: s.EndTime}}
 }
 func View(v model.Content, detail bool, now time.Time) Notice {
 	analyzed := v.ScheduleAnalysisID != "" && v.ScheduleInputHash != "" && v.ScheduleModelVersion != "" && v.ScheduleExtractionVersion != ""
-	n := Notice{ID: v.ID.Hex(), Title: v.Title, Summary: v.Summary, Source: v.SourceName, Category: v.Category, Categories: v.Categories, CategoryMethod: v.ClassificationMethod, PublishedAt: v.PublishedAt, OriginalURL: SafeURL(v.OriginalURL), Status: v.Status, Analyzed: analyzed, Review: v.ScheduleReviewRequired, SummaryReview: v.SummaryReviewRequired, Audience: v.TargetAudience, AudienceReview: v.TargetAudienceReviewRequired, Schedules: []Schedule{}}
+	n := Notice{reviewContentHash: v.ContentHash, reviewAnalysisID: v.ScheduleAnalysisID, ImageAnalysisUsed: v.ImageAnalysisUsed, ImageScheduleCount: v.ImageScheduleCount, ID: v.ID.Hex(), Title: v.Title, Summary: v.Summary, Source: v.SourceName, Category: v.Category, Categories: v.Categories, CategoryMethod: v.ClassificationMethod, PublishedAt: v.PublishedAt, OriginalURL: SafeURL(v.OriginalURL), Status: v.Status, Analyzed: analyzed, Review: v.ScheduleReviewRequired, SummaryReview: v.SummaryReviewRequired, Audience: v.TargetAudience, AudienceReview: v.TargetAudienceReviewRequired, Schedules: []Schedule{}}
 	if !analyzed {
 		n.Summary = ""
 		n.Audience = nil

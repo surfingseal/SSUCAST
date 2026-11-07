@@ -62,8 +62,15 @@ func TestNoticesIsolatedMongo(t *testing.T) {
 			s.EndDate = &late
 			v.Schedules = []model.Schedule{s}
 		case 2:
-			v.Title = "불확실 신청"
+			v.Title = "불확실 이미지 신청"
 			s := confirmed
+			earliest := "2026-11-07"
+			futureClock := "23:00"
+			s.EndDate = &earliest
+			s.EndTime = &futureClock
+			s.Origin = "image_ai"
+			s.Quality = &model.ScheduleQuality{State: "uncertain"}
+			s.ImageEvidence = []model.ImageEvidence{{ImageURL: "https://scatch.ssu.ac.kr/wp-content/uploads/synthetic.png", Text: "합성 이미지 근거"}}
 			s.ReviewRequired = true
 			v.Schedules = []model.Schedule{s}
 		case 3:

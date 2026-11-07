@@ -116,3 +116,35 @@ func TestSessionCookieAndLogout(t *testing.T) {
 		t.Fatal("logout failed")
 	}
 }
+
+func TestHTTPSProxyOriginAndHealth(t *testing.T) {
+	app := &Server{Store: &fake{}, Token: testToken, PublicOrigin: "https://ssucast.onrender.com"}
+	h := app.Handler()
+	req := httptest.NewRequest("POST", "http://internal/api/session", strings.NewReader(`{"token":"`+testToken+`"}`))
+	req.Header.Set("Origin", "https://ssucast.onrender.com")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != 200 || len(w.Result().Cookies()) != 1 || !w.Result().Cookies()[0].Secure || !w.Result().Cookies()[0].HttpOnly {
+		t.Fatal("proxy HTTPS login/cookie failed", w.Code)
+	}
+	req = httptest.NewRequest("POST", "http://internal/api/session", strings.NewReader(`{"token":"`+testToken+`"}`))
+	req.Header.Set("Origin", "https://attacker.example")
+	req.Header.Set("X-Forwarded-Proto", "https")
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != 403 {
+		t.Fatal("cross-origin login allowed")
+	}
+	req = httptest.NewRequest("GET", "http://internal/healthz", nil)
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != 200 || strings.Contains(w.Body.String(), testToken) {
+		t.Fatal("healthcheck failed")
+	}
+	req = httptest.NewRequest("GET", "http://internal/api/notices", nil)
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != 401 {
+		t.Fatal("deployment disabled authentication")
+	}
+}

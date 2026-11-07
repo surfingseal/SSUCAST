@@ -31,12 +31,14 @@ type Reader interface {
 	NoticeMetadata(context.Context) (notices.Metadata, error)
 }
 type Server struct {
-	Store    Reader
-	Token    string
-	Now      func() time.Time
-	mu       sync.Mutex
-	sessions map[string]time.Time
-	failures map[string][]time.Time
+	PublicOrigin  string
+	TimingReviews notices.TimingReviews
+	Store         Reader
+	Token         string
+	Now           func() time.Time
+	mu            sync.Mutex
+	sessions      map[string]time.Time
+	failures      map[string][]time.Time
 }
 
 func (s *Server) now() time.Time {
@@ -73,9 +75,10 @@ func (s *Server) Handler() http.Handler {
 	static, _ := fs.Sub(assets, "static")
 	files := http.FileServer(http.FS(static))
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { send(w, 200, map[string]string{"status": "ok"}) })
 	mux.HandleFunc("POST /api/session", s.login)
 	mux.HandleFunc("DELETE /api/session", func(w http.ResponseWriter, r *http.Request) {
-		if !sameOrigin(r) {
+		if !s.sameOrigin(r) {
 			send(w, 403, map[string]string{"error": "허용되지 않은 요청입니다"})
 			return
 		}
@@ -85,7 +88,7 @@ func (s *Server) Handler() http.Handler {
 			delete(s.sessions, hex.EncodeToString(hash[:]))
 			s.mu.Unlock()
 		}
-		http.SetCookie(w, &http.Cookie{Name: "ssu_session", Path: "/", MaxAge: -1, HttpOnly: true, SameSite: http.SameSiteStrictMode})
+		http.SetCookie(w, &http.Cookie{Name: "ssu_session", Path: "/", MaxAge: -1, HttpOnly: true, Secure: r.TLS != nil || s.PublicOrigin != "", SameSite: http.SameSiteStrictMode})
 		send(w, 200, map[string]bool{"authenticated": false})
 	})
 	mux.HandleFunc("GET /api/session", func(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +128,10 @@ func (s *Server) Handler() http.Handler {
 		mux.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-func sameOrigin(r *http.Request) bool {
+func (s *Server) sameOrigin(r *http.Request) bool {
+	if s.PublicOrigin != "" {
+		return r.Header.Get("Origin") == s.PublicOrigin
+	}
 	scheme := "http"
 	if r.TLS != nil {
 		scheme = "https"
@@ -133,7 +139,7 @@ func sameOrigin(r *http.Request) bool {
 	return r.Header.Get("Origin") == scheme+"://"+r.Host
 }
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {
-	if !sameOrigin(r) {
+	if !s.sameOrigin(r) {
 		send(w, 403, map[string]string{"error": "같은 사이트에서 로그인해 주세요"})
 		return
 	}
@@ -201,7 +207,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	s.sessions[hex.EncodeToString(hash[:])] = now.Add(8 * time.Hour)
 	delete(s.failures, ip)
 	s.mu.Unlock()
-	http.SetCookie(w, &http.Cookie{Name: "ssu_session", Value: token, Path: "/", MaxAge: 8 * 3600, HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil})
+	http.SetCookie(w, &http.Cookie{Name: "ssu_session", Value: token, Path: "/", MaxAge: 8 * 3600, HttpOnly: true, SameSite: http.SameSiteStrictMode, Secure: r.TLS != nil || s.PublicOrigin != ""})
 	send(w, 200, map[string]bool{"authenticated": true})
 }
 func (s *Server) api(w http.ResponseWriter, r *http.Request) {
@@ -242,6 +248,9 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request) {
 			s.failure(w, e)
 			return
 		}
+		for i := range v.Items {
+			s.TimingReviews.Apply(&v.Items[i])
+		}
 		send(w, 200, v)
 		return
 	}
@@ -260,6 +269,7 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request) {
 			s.failure(w, e)
 			return
 		}
+		s.TimingReviews.Apply(&v)
 		send(w, 200, v)
 		return
 	}

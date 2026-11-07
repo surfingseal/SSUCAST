@@ -65,10 +65,11 @@ func contextFailure(stage, raw string, err error) *FetchError {
 // Configure before sharing between goroutines. FixtureOrigin is only for a
 // trusted in-process fixture, never loaded from a source config or an API input.
 type Fetcher struct {
-	Timeout       time.Duration
-	FixtureOrigin string
-	mu            sync.Mutex
-	origins       map[string]*originGate
+	MaxResponseBytes int64 // Configure before use; zero keeps the normal 2MiB cap, at most10MiB.
+	Timeout          time.Duration
+	FixtureOrigin    string
+	mu               sync.Mutex
+	origins          map[string]*originGate
 }
 type originGate struct {
 	mu            sync.Mutex
@@ -177,17 +178,18 @@ type RequestRecord struct {
 	StartedAt time.Time `json:"started_at"`
 }
 type Session struct {
-	source      model.Source
-	origin      *url.URL
-	client      *http.Client
-	gate        *originGate
-	mu          sync.Mutex
-	requests    int
-	robotsReady chan struct{}
-	robots      *robotstxt.Group
-	robotsErr   error
-	robotsPage  Page
-	requestLog  []RequestRecord
+	source           model.Source
+	origin           *url.URL
+	client           *http.Client
+	gate             *originGate
+	mu               sync.Mutex
+	requests         int
+	robotsReady      chan struct{}
+	robots           *robotstxt.Group
+	robotsErr        error
+	robotsPage       Page
+	requestLog       []RequestRecord
+	maxResponseBytes int64
 }
 
 func ValidateSource(s model.Source) error {
@@ -202,6 +204,9 @@ func (f *Fetcher) NewSession(s model.Source) (*Session, error) {
 }
 func (f *Fetcher) newSession(s model.Source, fixture string) (*Session, error) {
 	s = s.WithDefaults()
+	if f.MaxResponseBytes < 0 || f.MaxResponseBytes > 10<<20 {
+		return nil, fmt.Errorf("response size cap outside0..10MiB")
+	}
 	if s.RequestJitterMS < 0 || s.RequestJitterMS > 60000 || s.MaxRetries != nil && (*s.MaxRetries < 0 || *s.MaxRetries > 2) {
 		return nil, fmt.Errorf("invalid jitter/retry limits")
 	}
@@ -222,7 +227,7 @@ func (f *Fetcher) newSession(s model.Source, fixture string) (*Session, error) {
 		return nil, failure("ssrf", "validate", s.BaseURL, 0, 0, errors.New("nonpublic address"))
 	}
 	origin := &url.URL{Scheme: base.Scheme, Host: base.Host}
-	session := &Session{source: s, origin: origin, gate: f.gate(origin.String(), time.Duration(s.RequestIntervalMS)*time.Millisecond, s.MaxConcurrency)}
+	session := &Session{source: s, origin: origin, maxResponseBytes: f.MaxResponseBytes, gate: f.gate(origin.String(), time.Duration(s.RequestIntervalMS)*time.Millisecond, s.MaxConcurrency)}
 	listURL, err := session.Resolve(base.String(), s.ListURL)
 	if err != nil {
 		return nil, err
@@ -457,13 +462,17 @@ func (s *Session) once(ctx context.Context, raw, stage string, attempt int) (Pag
 		fe.Attempt = attempt
 		return Page{}, 0, fe
 	}
-	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxBody+1))
+	limit := s.maxResponseBytes
+	if limit == 0 || stage == "robots" {
+		limit = maxBody
+	}
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	closeErr := resp.Body.Close()
 	if readErr == nil {
 		readErr = closeErr
 	}
 	page := Page{Body: body, URL: raw, Status: resp.StatusCode}
-	if len(body) > maxBody {
+	if int64(len(body)) > limit {
 		return page, 0, failure("body_limit", stage, raw, resp.StatusCode, attempt, errors.New("response exceeds size limit"))
 	}
 	if readErr != nil {

@@ -13,7 +13,7 @@ import (
 
 func noticeProjection(detail bool) bson.M {
 	p := bson.M{}
-	for _, k := range []string{"title", "summary", "source_name", "category", "categories", "classification_method", "published_at", "original_url", "status", "target_audience", "target_audience_review_required", "summary_review_required", "schedule_analysis_id", "schedule_input_hash", "schedule_model_version", "schedule_extraction_version", "schedule_review_required", "schedules", "content_hash", "notice_policy"} {
+	for _, k := range []string{"title", "summary", "source_name", "category", "categories", "classification_method", "published_at", "original_url", "status", "target_audience", "target_audience_review_required", "summary_review_required", "schedule_analysis_id", "schedule_input_hash", "schedule_model_version", "schedule_extraction_version", "schedule_review_required", "schedules", "content_hash", "notice_policy", "image_analysis_used", "image_schedule_count"} {
 		p[k] = 1
 	}
 	if detail {

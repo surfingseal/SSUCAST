@@ -87,3 +87,12 @@ func TestPolicyInvalidatesOnChangedInput(t *testing.T) {
 		t.Fatal("stale policy valid")
 	}
 }
+
+func TestImageYearNeverAssumed(t *testing.T) {
+	s := candidate()
+	s.ImageEvidence = []model.ImageEvidence{{ImageURL: "https://example.invalid/poster.png", Text: "11월5일"}}
+	p, _ := Project(model.Content{Schedules: []model.Schedule{s}}, 2026, time.Now())
+	if p.Schedules[0].EndDate != nil || p.Schedules[0].EndPartial.Year != nil || p.ExpiresAt != nil {
+		t.Fatal("image year auto-filled", p)
+	}
+}

@@ -42,6 +42,7 @@ type ScheduleQuality struct {
 	DeadlineCandidate bool     `json:"deadline_candidate" bson:"deadline_candidate"`
 }
 type Schedule struct {
+	ImageEvidence []ImageEvidence  `json:"image_evidence,omitempty" bson:"image_evidence,omitempty"`
 	EvidenceSpans []SourceSpan     `json:"evidence_spans,omitempty" bson:"evidence_spans,omitempty"`
 	Quality       *ScheduleQuality `json:"quality,omitempty" bson:"quality,omitempty"`
 

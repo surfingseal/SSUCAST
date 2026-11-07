@@ -456,3 +456,38 @@ func TestRobotsCaptureLedgerAndHTMLFailClosed(t *testing.T) {
 		})
 	}
 }
+
+func TestOptInImageBodyLimit(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/robots.txt" {
+			allow(w)
+			return
+		}
+		fmt.Fprint(w, strings.Repeat("x", 3<<20))
+	}))
+	defer srv.Close()
+	source := model.Source{BaseURL: srv.URL, ListURL: "/", PolicyApproved: true, RequestIntervalMS: 1}
+	f := NewFetcher(5 * time.Second)
+	f.FixtureOrigin = srv.URL
+	f.MaxResponseBytes = 10 << 20
+	session, e := f.NewSession(source)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer session.Close()
+	if p, e := session.Get(context.Background(), srv.URL+"/poster"); e != nil || len(p.Body) != 3<<20 {
+		t.Fatal("image cap failed", e)
+	}
+	f.MaxResponseBytes = 0
+	s2, e := f.NewSession(source)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer s2.Close()
+	_, e = s2.Get(context.Background(), srv.URL+"/poster")
+	code(t, e, "body_limit")
+	f.MaxResponseBytes = 11 << 20
+	if _, e = f.NewSession(source); e == nil {
+		t.Fatal("unbounded image cap")
+	}
+}

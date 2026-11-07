@@ -1,4 +1,17 @@
 .git
 .cache
 .env
+.env.*
+!.env.example
+outputs
+work
 bin
+node_modules
+**/node_modules
+**/testdata
+*.bson
+*.pem
+*.key
+*service-account*.json
+*credentials*.json
+.DS_Store

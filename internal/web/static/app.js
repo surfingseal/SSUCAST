@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id);
 const state={page:1,limit:12,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false,include_expired:false};
 let sources=[],categories=[],pageData=null,listController=null,detailController=null;
 const icons={all:'▦',academic:'▤',scholarship:'◇',international:'◎',international_student:'↗',extracurricular:'✦',teaching:'▧',volunteer:'♡',other:'···'};
-const reasons={missing_year:'연도 확인 필요',unsupported_datetime:'날짜·시각 근거 확인 필요',evidence_mismatch:'원문 근거 불일치',tentative_schedule:'변경될 수 있는 일정',conditional_deadline:'조건부 마감',source_conflict:'원문 내용 확인 필요',approximate_date:'대략적인 날짜',missing_date:'날짜 미상',missing_time:'시각 미기재',no_fixed_calendar:'확정 날짜 없음'};
+const reasons={image_evidence_not_independently_verified:'이미지 판독 내용 확인 필요',text_image_conflict:'본문과 이미지의 일정이 다름',image_model_review_required:'이미지 정보 검토 필요',low_image_confidence:'작거나 흐린 이미지 판독 확인 필요',missing_year:'연도 확인 필요',unsupported_datetime:'날짜·시각 근거 확인 필요',evidence_mismatch:'원문 근거 불일치',tentative_schedule:'변경될 수 있는 일정',conditional_deadline:'조건부 마감',source_conflict:'원문 내용 확인 필요',approximate_date:'대략적인 날짜',missing_date:'날짜 미상',missing_time:'시각 미기재',no_fixed_calendar:'확정 날짜 없음'};
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function sourceLabel(id){return sources.find(s=>s.name===id)?.label||id;}
 function categoryLabel(id){return categories.find(c=>c.id===id)?.label||(id==='unknown'?'분류 확인 필요':id||'기타');}
@@ -28,7 +28,7 @@ function card(n){
  a.append(el('p','card-summary'+(!n.analyzed?' no-analysis':''),n.analyzed?n.summary||'요약이 없습니다. 원문을 확인해 주세요.':'아직 분석하지 않은 공지입니다. 상세보기에서 원문을 확인할 수 있어요.'));
  const preview=el('div','schedule-preview');const s=important(n.schedules);
  if(s){preview.append(el('strong','',s.label),el('span','',range(s)),el('span','state'+(s.review_required?' needs-review':''),s.state));if(n.schedules.length>1){const more=el('button','more-schedules',`일정 ${n.schedules.length-1}개 더 보기 ↗`);more.type='button';more.onclick=()=>detail(n.id);preview.append(more);}}
- else{preview.append(el('span','',n.analyzed?'추출된 일정 없음 · 필요 시 원문 확인':'일정 분석 전'));}
+ else{preview.append(el('span','',n.timing_review?n.timing_review.label:(n.analyzed?'추출된 일정 없음 · 필요 시 원문 확인':'일정 분석 전')));}
  a.append(preview);const bottom=el('div','card-bottom');bottom.append(el('span','',date(n.published_at)));if(n.review_required||n.summary_review_required||n.audience_review_required)bottom.append(el('span','review-pill','일부 정보 확인 필요'));else bottom.append(el('span','',n.analyzed?'AI 요약 제공':'원문 공지'));a.append(bottom);return a;
 }
 async function load(){
@@ -41,15 +41,24 @@ async function load(){
 }
 function section(title){const s=el('section','detail-section');s.append(el('h3','',title));return s;}
 function schedule(s){
- const a=el('article','schedule-item'+(s.parent_id?' child':''));const heading=el('div','schedule-heading');heading.append(el('h4','',s.label),el('span','schedule-state'+(s.review_required?' review':''),s.state));a.append(heading,el('p','schedule-dates',range(s)));if(s.year_assumed)a.append(el('div','schedule-scope','연도는 사용자 기준연도 정책으로 보완했습니다.'));if(s.scope)a.append(el('div','schedule-scope','구분 · '+s.scope));if(s.review_required){const r=s.review_reasons.map(v=>reasons[v]||'추가 원문 검토 필요');a.append(el('p','review-note','확정 일정으로 사용하지 마세요.'+(r.length?' '+[...new Set(r)].join(' · '):'')));}
- const quotes=(s.evidence_spans||[]).filter(v=>v.location?.matched&&v.location.original_text).map(v=>v.location.original_text);if(!quotes.length&&s.evidence)quotes.push(s.evidence);if(quotes.length){const evidence=el('details');evidence.append(el('summary','','원문 근거 보기'));for(const q of [...new Set(quotes)])evidence.append(el('blockquote','',q));a.append(evidence);}return a;
+ const a=el('article','schedule-item'+(s.parent_id?' child':''));const heading=el('div','schedule-heading');heading.append(el('h4','',s.label),el('span','schedule-state'+(s.review_required?' review':''),s.state));a.append(heading);a.append(el('span','image-origin',s.image_derived?(s.origin==='merged_text_image'?'본문·이미지 병합':'이미지에서 추출됨'):'본문 기반 일정'));a.append(el('p','schedule-dates',range(s)));if(s.year_assumed)a.append(el('div','schedule-scope','연도는 사용자 기준연도 정책으로 보완했습니다.'));if(s.scope)a.append(el('div','schedule-scope','구분 · '+s.scope));if(s.review_required){const r=s.review_reasons.map(v=>reasons[v]||'추가 원문 검토 필요');a.append(el('p','review-note','확정 일정으로 사용하지 마세요.'+(r.length?' '+[...new Set(r)].join(' · '):'')));}
+ if(s.image_derived){const imageProof=el('details');imageProof.append(el('summary','','이미지 판독 근거 보기'));for(const evidence of s.image_evidence||[]){imageProof.append(el('blockquote','',evidence.evidence_text));if(evidence.image_url){const link=el('a','','원본 이미지 보기 ↗');link.href=evidence.image_url;link.target='_blank';link.rel='noopener noreferrer';imageProof.append(link);}}imageProof.append(el('p','review-note','모델이 이미지에서 읽은 문구입니다. 판독 정확성은 원본 이미지에서 확인해 주세요.'));a.append(imageProof);}
+ const quotes=(s.evidence_spans||[]).filter(v=>v.location?.matched&&v.location.original_text).map(v=>v.location.original_text);if(!quotes.length&&s.evidence&&!s.image_derived)quotes.push(s.evidence);if(quotes.length){const evidence=el('details');evidence.append(el('summary','','원문 근거 보기'));for(const q of [...new Set(quotes)])evidence.append(el('blockquote','',q));a.append(evidence);}return a;
+}
+function timingReview(r){
+ const box=section(r.label);box.classList.add('timing-review');box.append(el('p','',r.message));
+ for(const rule of r.rules||[])box.append(el('p','timing-rule',rule));
+ if(r.review_required)box.append(el('p','review-note','고정 마감일이 확인되지 않았습니다. 신청 전에 원문을 확인해 주세요.'));
+ if(r.evidence?.length){const proof=el('details');proof.append(el('summary','','점검 근거 보기'));for(const e of r.evidence){proof.append(el('p','timing-source',e.source==='image'?'저장 이미지':e.source==='existing_schedule'?'기존 일정':'저장 본문'),el('blockquote','',e.text));if(e.url){const a=el('a','','근거 이미지 보기 ↗');a.href=e.url;a.target='_blank';a.rel='noopener noreferrer';proof.append(a);}}box.append(proof);}
+ return box;
 }
 async function detail(id){
  if(detailController)detailController.abort();detailController=new AbortController();const controller=detailController;const dlg=$('detail');$('detail-content').replaceChildren(el('h2','detail-title','공지를 불러오는 중'));$('detail-content').firstChild.id='detail-title';if(!dlg.open)dlg.showModal();dlg.scrollTop=0;
  try{const n=await api('/api/notices/'+encodeURIComponent(id),{signal:controller.signal});if(controller!==detailController)return;const box=$('detail-content');box.replaceChildren();const meta=el('div','detail-meta');meta.append(el('span','category-tag '+n.category,categoryLabel(n.category)),el('span','',sourceLabel(n.source)),el('span','',date(n.published_at)),el('span','',n.category_method==='ai'?'AI 분류':'학교 공식 분류'));const h=el('h2','detail-title',n.title);h.id='detail-title';box.append(meta,h);
  const summary=el('section','detail-summary');summary.append(el('h3','',n.analyzed?'✦ AI 요약':'원문 공지'),el('p','',n.analyzed?n.summary||'제공된 요약이 없습니다.':'아직 AI 분석이 완료되지 않은 공지입니다. 아래 원문 내용을 확인해 주세요.'));if(n.summary_review_required)summary.append(el('p','review-note','요약의 대상·조건 등은 원문 확인이 필요합니다.'));box.append(summary);
  const audience=section('누가 참여할 수 있나요?');audience.append(el('p','audience',n.audience_review_required?'참여 대상과 지원 자격은 원문에서 확인해 주세요.':n.target_audience||'확인된 참여 대상 정보가 없습니다.'));box.append(audience);
- const schedules=section(`일정 ${n.schedules.length}개`);if(n.schedules.length)for(const s of n.schedules)schedules.append(schedule(s));else schedules.append(el('p','audience',n.analyzed?'저장된 본문에서 일정을 추출하지 못했습니다. 첨부파일이나 원문에 추가 정보가 있을 수 있어요.':'일정이 아직 분석되지 않았습니다.'));box.append(schedules);
+ if(n.timing_review)box.append(timingReview(n.timing_review));
+ const schedules=section(`일정 ${n.schedules.length}개`);if(n.schedules.length)for(const s of n.schedules)schedules.append(schedule(s));else schedules.append(el('p','audience',n.timing_review?n.timing_review.message:(n.analyzed?'저장된 본문에서 일정을 추출하지 못했습니다. 첨부파일이나 원문에 추가 정보가 있을 수 있어요.':'일정이 아직 분석되지 않았습니다.')));box.append(schedules);
  const original=el('details','original-body');original.append(el('summary','','저장된 원문 본문 보기'),el('pre','',n.content||'저장된 본문이 없습니다.'));box.append(original);
  if(n.original_url){const link=el('a','primary original-link','학교 원문에서 자세히 보기 ↗');link.href=n.original_url;link.target='_blank';link.rel='noopener noreferrer';box.append(link);}else box.append(el('p','review-note','안전한 원문 링크가 제공되지 않았습니다.'));
  box.append(el('p','detail-footnote','AI가 정리한 정보가 포함되어 있습니다. 일정과 지원 자격은 변경될 수 있으니 신청 전 원문을 확인해 주세요.'));

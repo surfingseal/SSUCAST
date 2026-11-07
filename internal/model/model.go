@@ -48,11 +48,16 @@ type Job struct {
 	ErrorMessage   string        `bson:"error_message" json:"error_message"`
 }
 type Content struct {
-	NoticePolicy   *NoticePolicy `json:"notice_policy,omitempty" bson:"notice_policy,omitempty"`
-	ExternalPostID string        `bson:"external_post_id,omitempty" json:"external_post_id,omitempty"`
-	IsPinned       bool          `bson:"is_pinned,omitempty" json:"is_pinned,omitempty"`
-	ParserVersion  string        `bson:"parser_version,omitempty" json:"parser_version,omitempty"`
-	CategorySource string        `bson:"category_source,omitempty" json:"category_source,omitempty"`
+	ImageAnalysisInputHash   string        `json:"-" bson:"image_analysis_input_hash,omitempty"`
+	ImageAnalysisUsed        bool          `json:"image_analysis_used,omitempty" bson:"image_analysis_used,omitempty"`
+	ImageAnalysisContentHash string        `json:"-" bson:"image_analysis_content_hash,omitempty"`
+	ImageScheduleCount       int           `json:"image_schedule_count,omitempty" bson:"image_schedule_count,omitempty"`
+	ImageEvidenceCount       int           `json:"image_evidence_count,omitempty" bson:"image_evidence_count,omitempty"`
+	NoticePolicy             *NoticePolicy `json:"notice_policy,omitempty" bson:"notice_policy,omitempty"`
+	ExternalPostID           string        `bson:"external_post_id,omitempty" json:"external_post_id,omitempty"`
+	IsPinned                 bool          `bson:"is_pinned,omitempty" json:"is_pinned,omitempty"`
+	ParserVersion            string        `bson:"parser_version,omitempty" json:"parser_version,omitempty"`
+	CategorySource           string        `bson:"category_source,omitempty" json:"category_source,omitempty"`
 
 	ScheduleMetadata         `bson:",inline"`
 	Schedules                []Schedule           `bson:"schedules,omitempty" json:"schedules,omitempty"`

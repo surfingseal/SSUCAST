@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"example.com/crawlserver/internal/config"
+	"example.com/crawlserver/internal/notices"
 	"example.com/crawlserver/internal/repository"
 	"example.com/crawlserver/internal/web"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,18 +32,11 @@ func run() error {
 	if len(token) < 24 {
 		return fmt.Errorf("ADMIN_TOKEN must contain24bytes")
 	}
-	addr := os.Getenv("WEB_ADDR")
-	if addr == "" {
-		addr = "127.0.0.1:8080"
-	}
-	host, _, e := net.SplitHostPort(addr)
+	addr, origin, e := webSettings(os.Getenv)
 	if e != nil {
 		return e
 	}
-	ip := net.ParseIP(host)
-	if ip == nil || !ip.IsLoopback() {
-		return fmt.Errorf("WEB_ADDR must be a loopback IP; external hosting disabled")
-	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	init, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -53,7 +46,16 @@ func run() error {
 		return e
 	}
 	defer store.Client.Disconnect(context.Background())
-	app := &web.Server{Store: store, Token: token}
+	reviewFile := os.Getenv("WEB_TIMING_REVIEW_FILE")
+	explicitReview := reviewFile != ""
+	if reviewFile == "" {
+		reviewFile = "outputs/missing-schedules-review/annotations.json"
+	}
+	reviews, e := notices.LoadTimingReviews(reviewFile)
+	if e != nil && (explicitReview || !os.IsNotExist(e)) {
+		return fmt.Errorf("일정 점검 안내 파일을 확인하세요")
+	}
+	app := &web.Server{Store: store, Token: token, TimingReviews: reviews, PublicOrigin: origin}
 	server := &http.Server{Addr: addr, Handler: app.Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 << 10}
 	done := make(chan error, 1)
 	go func() { fmt.Println("SSU 공지 모아보기: http://" + addr); done <- server.ListenAndServe() }()

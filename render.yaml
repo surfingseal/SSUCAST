@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ssucast
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile.web
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: off
+    envVars:
+      - key: WEB_DEPLOYMENT
+        value: render
+      - key: MONGODB_DATABASE
+        value: ssu_crawler
+      - key: MONGODB_URI
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
