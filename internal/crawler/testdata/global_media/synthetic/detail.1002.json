@@ -1,0 +1,10 @@
+{
+  "fixture": {
+    "id": 1002,
+    "title": "[합성] 대학원 신입생 모집",
+    "author": "합성 작성자",
+    "date": "2026-11-01 09:00:00",
+    "body": "<nav>제거할 메뉴</nav><article data-synthetic-notice><div class=\"synthetic-body\"><nav>본문 내 메뉴</nav><p>대학원 입학 지원과 전형 일정을 안내합니다.</p><script>bad()</script><footer>꼬리말</footer></div></article><footer>바깥 UI</footer>",
+    "files": []
+  }
+}

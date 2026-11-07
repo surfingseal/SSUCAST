@@ -1,0 +1,22 @@
+{
+  "reviewed": true,
+  "evidence_kind": "actual",
+  "evidence": "2026-11-07 actual linked client module92836, public ROLE_GUEST list/detail captures, robots Allow:/, terms redirects home; docs/global-media-crawler.md",
+  "website_origin": "https://media.ssu.ac.kr",
+  "api_origin": "https://3-37-127-112.sslip.io",
+  "list_path": "/v1/board/",
+  "menu_id": "136",
+  "page_size": 15,
+  "detail_path": "/v1/board/{id}",
+  "detail_fields": {
+    "id": "/data/id",
+    "title": "/data/title",
+    "content": "/data/content",
+    "author": "/data/userName",
+    "published_at": "/data/createdAt"
+  },
+  "body_format": "editor_text_nodes",
+  "attachments_pointer": "/data/attachments",
+  "attachment_ids_only": true,
+  "category_absence_verified": true
+}

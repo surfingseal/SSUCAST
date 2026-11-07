@@ -1,0 +1,26 @@
+{
+  "reviewed": true,
+  "evidence_kind": "synthetic",
+  "evidence": "synthetic test contract; NOT a captured production API",
+  "api_origin": "https://fixture.invalid",
+  "list_path": "/synthetic/list",
+  "menu_id": "136",
+  "page_size": 15,
+  "detail_path": "/synthetic/detail/{id}",
+  "detail_fields": {
+    "id": "/fixture/id",
+    "title": "/fixture/title",
+    "content": "/fixture/body",
+    "author": "/fixture/author",
+    "published_at": "/fixture/date"
+  },
+  "body_format": "html",
+  "body_selector": "article[data-synthetic-notice] .synthetic-body",
+  "attachments_pointer": "/fixture/files",
+  "attachment_fields": {
+    "name": "/filename",
+    "url": "/href"
+  },
+  "category_pointer": "",
+  "category_absence_verified": true
+}

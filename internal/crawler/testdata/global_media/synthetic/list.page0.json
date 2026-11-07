@@ -1,0 +1,61 @@
+{
+  "data": {
+    "boards": [
+      {
+        "id": 1001,
+        "title": "[합성] 글로벌미디어 창작 워크숍 참가자 모집",
+        "userName": "합성 작성자",
+        "createdAt": "2026-11-01 09:00:00",
+        "content": "synthetic list preview",
+        "isPinned": true,
+        "hasAttachment": true
+      },
+      {
+        "id": 1002,
+        "title": "[합성] 대학원 신입생 모집",
+        "userName": "합성 작성자",
+        "createdAt": "2026-11-01 09:00:00",
+        "content": "synthetic list preview",
+        "isPinned": false,
+        "hasAttachment": false
+      },
+      {
+        "id": 1003,
+        "title": "[합성] 계약직 직원 채용 공고",
+        "userName": "합성 작성자",
+        "createdAt": "2026-11-01 09:00:00",
+        "content": "synthetic list preview",
+        "isPinned": false,
+        "hasAttachment": false
+      },
+      {
+        "id": 1004,
+        "title": "[합성] 비전임교원 초빙 공고",
+        "userName": "합성 작성자",
+        "createdAt": "2026-11-01 09:00:00",
+        "content": "synthetic list preview",
+        "isPinned": false,
+        "hasAttachment": false
+      },
+      {
+        "id": 1005,
+        "title": "[합성] 비공개 글",
+        "userName": "합성 작성자",
+        "createdAt": "2026-11-01 09:00:00",
+        "content": "<redacted>",
+        "isPinned": false,
+        "hasAttachment": false
+      },
+      {
+        "id": 1006,
+        "title": "[합성] 학부 행정 안내",
+        "userName": "합성 작성자",
+        "createdAt": "2026-11-01 09:00:00",
+        "content": "synthetic list preview",
+        "isPinned": false,
+        "hasAttachment": false
+      }
+    ],
+    "totalPage": 2
+  }
+}

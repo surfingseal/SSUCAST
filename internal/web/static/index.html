@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#142b52"><title>SSU 공지 모아보기</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/app.css"><script src="/app.js" defer></script></head>
+<body>
+<header class="header"><div class="header-inner"><a class="brand" href="/" aria-label="SSU 공지 모아보기 홈"><span class="brand-mark">S<span>+</span></span><span>SSU <b>공지 모아보기</b></span></a><span class="header-caption">숭실의 소식, 한곳에서.</span><button id="logout" class="quiet hidden" type="button">로그아웃</button></div></header>
+<main id="login" class="login hidden"><span class="eyebrow">WELCOME TO YOUR CAMPUS</span><h1>필요한 공지를<br>더 쉽게 만나보세요.</h1><p>슈캐치와 글로벌미디어학부의 공지, 요약과 일정을 한곳에 모았습니다.</p><form id="login-form"><label for="token">서비스 접근 토큰</label><input type="password" id="token" autocomplete="current-password" required placeholder="기존 ADMIN_TOKEN을 입력하세요"><button class="primary" type="submit">공지 모아보기 시작하기 <span aria-hidden="true">↗</span></button><p id="login-error" role="alert"></p></form><small>접근 토큰은 화면에 저장되지 않습니다.</small></main>
+<main id="app" class="shell hidden">
+<section class="hero"><div><span class="eyebrow">YOUR CAMPUS, AT A GLANCE</span><h1>놓치고 싶지 않은<br class="mobile-break"> 숭실의 소식.</h1><p>장학부터 학사, 학과 소식까지.<br class="mobile-break"> 필요한 공지를 빠르게 찾아보세요.</p></div><div class="hero-stat"><span class="live-dot"></span><span>지금 확인할 수 있는 공지</span><strong id="visible-count">—<small>건</small></strong><span id="updated">업데이트 확인 중</span></div></section>
+<form class="search" id="search-form" role="search"><span class="search-icon" aria-hidden="true">⌕</span><input id="query" name="query" maxlength="100" type="search" placeholder="어떤 소식을 찾고 있나요?" aria-label="제목, 요약, 본문 검색"><button class="primary" type="submit">검색</button></form>
+<div class="workspace">
+<aside class="sidebar"><div class="sidebar-heading"><h2>카테고리</h2><button id="reset" type="button" class="quiet">초기화 ↺</button></div><nav id="categories" aria-label="카테고리 선택"></nav><div class="side-note"><span aria-hidden="true">✦</span><strong>짧게 읽고, 정확히 확인해요.</strong><p>AI 요약과 일정은 탐색을 돕는 정보예요. 신청 전에는 꼭 원문을 확인해 주세요.</p></div></aside>
+<section class="feed" aria-label="공지 목록"><div class="source-tabs" id="sources" role="group" aria-label="출처 선택"></div><div class="toolbar"><p id="result-count" aria-live="polite">공지를 불러오는 중</p><div class="toolbar-controls"><label class="check"><input id="upcoming" type="checkbox">예정 일정</label><label class="check"><input id="has-schedule" type="checkbox">일정 있는 공지</label><label class="sr-only" for="sort">정렬</label><select id="sort"><option value="latest">최신순</option><option value="deadline">마감 임박순</option><option value="event">행사 예정순</option></select><label class="sr-only" for="status">원본 상태</label><select id="status"><option value="">전체 상태</option><option value="진행">진행</option><option value="unknown">상태 미상</option><option value="완료">완료</option></select></div></div>
+<div id="filter-note" class="filter-note hidden"></div>
+<div id="feedback" class="feedback hidden" role="status"></div><div id="cards" class="cards" aria-live="polite"></div>
+<nav class="pagination" aria-label="페이지 이동"><button id="prev" type="button" class="page-button">← 이전</button><span id="page-label">1 / 1</span><button id="next" type="button" class="page-button">다음 →</button></nav>
+</section></div>
+<footer class="footer"><span>SSU 공지 모아보기</span><span>학교 공식 공지를 바탕으로 정리한 학습용 서비스입니다.</span><span>날짜·시각은 한국시간 기준</span></footer>
+</main>
+<dialog id="detail" aria-labelledby="detail-title"><div class="detail-top"><span class="eyebrow">NOTICE DETAILS</span><button id="close-detail" class="close" type="button" aria-label="상세보기 닫기">×</button></div><div id="detail-content"></div></dialog>
+<noscript><p>이 서비스를 사용하려면 JavaScript를 활성화해 주세요.</p></noscript>
+</body></html>

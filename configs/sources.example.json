@@ -1,0 +1,16 @@
+[
+  {
+    "name": "approved-site",
+    "crawler_type": "example",
+    "base_url": "https://approved-site.invalid",
+    "list_url": "/posts",
+    "enabled": false,
+    "request_interval": "3s",
+    "max_pages": 1,
+    "max_contents": 3,
+    "max_requests": 20,
+    "max_concurrency": 1,
+    "auto_enabled": false,
+    "schedule": "0 */6 * * *"
+  }
+]

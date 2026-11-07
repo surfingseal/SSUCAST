@@ -1,0 +1,27 @@
+.cache/
+.env
+/bin/
+*.test
+coverage.out
+
+# Local secrets, backups, paid experiments and captured datasets are not published.
+.env.*
+!.env.example
+outputs/
+*.bson
+*.pem
+*.key
+*service-account*.json
+*credentials*.json
+node_modules/
+.DS_Store
+internal/mvp/testdata/*.json
+internal/schedules/testdata/actual*.json
+internal/scheduleapply/testdata/actual*.json
+internal/evaluation/testdata/notices.json
+internal/crawler/testdata/ssu_catch/*.actual.*
+internal/crawler/testdata/ssu_catch/requests.json
+internal/crawler/testdata/ssu_catch/live_*/
+internal/crawler/testdata/ssu_catch/recent_categories/
+internal/crawler/testdata/global_media/*
+!internal/crawler/testdata/global_media/synthetic/

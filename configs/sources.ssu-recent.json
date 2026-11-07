@@ -1,0 +1,23 @@
+[
+  {
+    "name": "ssu_catch",
+    "crawler_type": "ssu_catch",
+    "base_url": "https://scatch.ssu.ac.kr",
+    "list_url": "/공지사항/",
+    "enabled": false,
+    "auto_enabled": false,
+    "policy_approved": true,
+    "detail_body_selector": "#contents .bg-white > hr + div",
+    "request_interval": "2s",
+    "max_pages": 30,
+    "max_contents": 1000,
+    "max_requests": 1500,
+    "max_concurrency": 1,
+    "schedule": "0 */6 * * *",
+    "classification_strategy": "source",
+    "collection_mode": "recent_three_months",
+    "policy_approval_basis": "2026-11-06 Asia/Seoul: user explicitly authorized ongoing requested public-notice collection; robots restrictions still enforced; not a claim of university reuse permission",
+    "request_jitter": "200ms",
+    "max_retries": 1
+  }
+]

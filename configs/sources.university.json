@@ -1,0 +1,36 @@
+[
+  {
+    "name": "ssu_catch",
+    "crawler_type": "ssu_catch",
+    "base_url": "https://scatch.ssu.ac.kr",
+    "list_url": "/공지사항/",
+    "enabled": false,
+    "auto_enabled": false,
+    "policy_approved": false,
+    "detail_body_selector": "",
+    "request_interval": "2s",
+    "max_pages": 1,
+    "max_contents": 3,
+    "max_requests": 5,
+    "max_concurrency": 1,
+    "schedule": "0 */6 * * *",
+    "classification_strategy": "source"
+  },
+  {
+    "name": "ssu_global_media",
+    "display_name": "숭실대학교 글로벌미디어학부",
+    "crawler_type": "ssu_global_media",
+    "base_url": "https://media.ssu.ac.kr",
+    "list_url": "/board/notices",
+    "enabled": false,
+    "auto_enabled": false,
+    "policy_approved": false,
+    "classification_strategy": "hybrid",
+    "request_interval": "2s",
+    "max_pages": 1,
+    "max_contents": 1,
+    "max_requests": 4,
+    "max_concurrency": 1,
+    "schedule": "0 */6 * * *"
+  }
+]

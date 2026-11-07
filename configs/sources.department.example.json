@@ -1,0 +1,17 @@
+[
+  {
+    "name": "department_example",
+    "crawler_type": "example",
+    "base_url": "https://department.example.invalid",
+    "list_url": "/notices/",
+    "enabled": false,
+    "auto_enabled": false,
+    "policy_approved": false,
+    "classification_strategy": "hybrid",
+    "max_pages": 1,
+    "max_contents": 1,
+    "max_requests": 3,
+    "max_concurrency": 1,
+    "request_interval": "2s"
+  }
+]

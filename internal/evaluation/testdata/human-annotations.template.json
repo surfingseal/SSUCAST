@@ -1,0 +1,197 @@
+[
+  {
+    "case_id": "s01",
+    "input_version": "prompt2",
+    "input_hash": "12a17a1d901f1d7eaba40853e3d43e0f6a6e8b79bbf209036b837046a849e9f9",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s02",
+    "input_version": "prompt2",
+    "input_hash": "76e1356fc24bf591ad1e4afbafe08c2a73fe27c326a8eacecb647e858fdc0c1e",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s03",
+    "input_version": "prompt2",
+    "input_hash": "34c359478a9733e2fd5285d665fe5f1951fda38ce8fdcf31abf5a8a29853d6e6",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s04",
+    "input_version": "prompt2",
+    "input_hash": "ff5ad866a466f4d3d550a0264b32529a20dc7cec5835aa0754e7f99116d0450c",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s05",
+    "input_version": "prompt2",
+    "input_hash": "aab4c1c8117aad9729c68aff671f727a744ac596fadd51e404405ab65974a6bb",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s06",
+    "input_version": "prompt2",
+    "input_hash": "965796fc773b279c4397021ed10e336271998db8f6ac6fd13ab08b2d0ebb1eaf",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s07",
+    "input_version": "prompt2",
+    "input_hash": "7c5d6161380c2b20dc3e3a53e51d6d3c4b852c5fa34f85cd6e3dab2aead177bf",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s08",
+    "input_version": "prompt2",
+    "input_hash": "1f47bc8a2b136b04f860ead71e03c9bf85c1127e135624c177ffae5e33805ba0",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s09",
+    "input_version": "prompt2",
+    "input_hash": "b864f6b03e85dae469e48dedf985218b1a5556a02645048ca5a9090f1d530837",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s10",
+    "input_version": "prompt2",
+    "input_hash": "58f567ed6b0e71486900b8aeaa62b7d6b02d5cbedc0c7110eec9d70801a76b95",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s11",
+    "input_version": "prompt2",
+    "input_hash": "57df4712225e21b1f21265e936b2ae8f463ca4c5374514049c729c53658e9b75",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s12",
+    "input_version": "prompt2",
+    "input_hash": "e7b8230acee3d685eb7e20bfa3b62edb3a91c17735d5b5053e00e70ae6cd2c86",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  },
+  {
+    "case_id": "s13",
+    "input_version": "prompt2",
+    "input_hash": "d91f0c7e4bc2d3c31f84b0cce7da0c4054a39047b2951a585eeba01626e6f774",
+    "origin": "human",
+    "approved": false,
+    "reviewer": "",
+    "approved_at": "",
+    "fields": [
+      "categories"
+    ],
+    "labels": {
+      "categories": []
+    }
+  }
+]

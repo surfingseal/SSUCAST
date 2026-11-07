@@ -1,0 +1,10 @@
+{
+  "fixture": {
+    "id": 1007,
+    "title": "[합성] 해외 연수 참가자 모집",
+    "author": "합성 작성자",
+    "date": "2026-11-01 09:00:00",
+    "body": "<nav>제거할 메뉴</nav><article data-synthetic-notice><div class=\"synthetic-body\"><nav>본문 내 메뉴</nav><p>해외 연수 참가자를 모집합니다. 국제교류 프로그램이며 해외 자매대학에서 문화와 전공 수업을 경험하는 행사입니다. 신청 기간과 제출 서류를 확인한 뒤 학부 행정실로 신청해 주시기 바랍니다.</p><script>bad()</script><footer>꼬리말</footer></div></article><footer>바깥 UI</footer>",
+    "files": []
+  }
+}

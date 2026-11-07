@@ -1,0 +1,10 @@
+{
+  "fixture": {
+    "id": 1006,
+    "title": "[합성] 학부 행정 안내",
+    "author": "합성 작성자",
+    "date": "2026-11-01 09:00:00",
+    "body": "<nav>제거할 메뉴</nav><article data-synthetic-notice><div class=\"synthetic-body\"><nav>본문 내 메뉴</nav><p>계약직 직원 채용 공고입니다.</p><script>bad()</script><footer>꼬리말</footer></div></article><footer>바깥 UI</footer>",
+    "files": []
+  }
+}

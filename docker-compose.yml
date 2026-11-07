@@ -1,0 +1,39 @@
+services:
+  mongo:
+    image: ${MONGODB_IMAGE:-mongo:7.0}
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: crawler
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?set MONGO_PASSWORD in .env}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username crawler --password \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval 'db.adminCommand({ping:1})'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      HTTP_ADDR: :8080
+      MONGODB_URI: mongodb://crawler:${MONGO_PASSWORD:?set MONGO_PASSWORD in .env}@mongo:27017/?authSource=admin
+      MONGODB_DATABASE: crawlserver
+      ADMIN_TOKEN: ${ADMIN_TOKEN:?set ADMIN_TOKEN in .env}
+      DEMO_MODE: ${DEMO_MODE:-true}
+      SOURCE_URL: ${SOURCE_URL:-}
+      CRAWL_SOURCES_FILE: ${CRAWL_SOURCES_FILE:-}
+      SOURCE_SCHEDULE: ${SOURCE_SCHEDULE:-0 */6 * * *}
+      WORKERS: ${WORKERS:-2}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-15s}
+      JOB_TIMEOUT: ${JOB_TIMEOUT:-10m}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./configs:/app/configs:ro
+    init: true
+    stop_grace_period: 45s
+    restart: unless-stopped
+volumes:
+  mongo_data:

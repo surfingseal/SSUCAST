@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /wp-content/plugins/
+Disallow: /wp-admin
+Disallow: /download.php
