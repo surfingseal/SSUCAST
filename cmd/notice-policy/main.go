@@ -82,7 +82,7 @@ func run() error {
 	}
 	targets := []target{}
 	plans := []map[string]any{}
-	filled, hidden, duplicate := 0, 0, 0
+	filled, hidden, duplicate, acceptedImages := 0, 0, 0, 0
 	for _, raw := range rows {
 		var v model.Content
 		if bson.Unmarshal(raw, &v) != nil {
@@ -104,11 +104,12 @@ func run() error {
 		if hide {
 			hidden++
 		}
+		acceptedImages += p.ImageAcceptedSchedules
 		filled += p.BoundariesFilled
 		targets = append(targets, target{raw, v, p})
-		plans = append(plans, map[string]any{"id": v.ID.Hex(), "title": v.Title, "source": v.SourceName, "filled_year_boundaries": p.BoundariesFilled, "hidden_expired": hide, "expires_at": p.ExpiresAt, "expiry_reason": p.ExpiryReason, "outcome": outcome})
+		plans = append(plans, map[string]any{"id": v.ID.Hex(), "title": v.Title, "source": v.SourceName, "accepted_image_schedules": p.ImageAcceptedSchedules, "filled_year_boundaries": p.BoundariesFilled, "hidden_expired": hide, "expires_at": p.ExpiresAt, "expiry_reason": p.ExpiryReason, "outcome": outcome})
 	}
-	report := map[string]any{"year": *year, "total": len(rows), "targets": len(targets), "year_boundaries_filled": filled, "expired_candidates": hidden, "duplicates": duplicate, "plans": plans, "gemini_requests": 0, "school_requests": 0, "writes": 0, "mode": "preview"}
+	report := map[string]any{"year": *year, "total": len(rows), "targets": len(targets), "image_source_policy": noticepolicy.ImageSourcePolicy, "accepted_image_schedules": acceptedImages, "year_boundaries_filled": filled, "expired_candidates": hidden, "duplicates": duplicate, "plans": plans, "gemini_requests": 0, "school_requests": 0, "writes": 0, "mode": "preview"}
 	if e = mvp.Write(*out, "preview.json", report); e != nil {
 		return e
 	}

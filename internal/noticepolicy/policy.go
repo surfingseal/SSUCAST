@@ -75,6 +75,10 @@ func Project(v model.Content, year int, now time.Time) (model.NoticePolicy, erro
 	for i := range rows {
 		s := &rows[i]
 		if len(s.ImageEvidence) > 0 {
+			if acceptImage(s) {
+				p.ImageSourcePolicy = ImageSourcePolicy
+				p.ImageAcceptedSchedules++
+			}
 			continue
 		} // Image years require visible image evidence; never apply text-year assumption.
 		filled := 0
