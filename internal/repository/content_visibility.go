@@ -3,8 +3,10 @@ package repository
 import (
 	"context"
 	"example.com/crawlserver/internal/model"
+	"example.com/crawlserver/internal/noticepolicy"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 // SSUCatchSourceIDs uses authoritative Source records, not a title/domain or a
@@ -32,6 +34,10 @@ func SSUCatchSourceIDs(ctx context.Context, db *mongo.Database) ([]bson.ObjectID
 // Applying it in MongoDB before skip/limit keeps pagination correct.
 func (s *ContentRepository) ListVisibilityQuery(ctx context.Context, f model.Filter) (bson.M, error) {
 	q := query(f, "crawled_at")
+	if !f.IncludeExpired {
+		clauses, _ := q["$nor"].(bson.A)
+		q["$nor"] = append(clauses, bson.M{"notice_policy.expires_at": bson.M{"$ne": nil, "$lte": time.Now().UTC()}, "$expr": noticePolicyValid()})
+	}
 	if f.IncludeCompleted {
 		return q, nil
 	}
@@ -46,4 +52,8 @@ func (s *ContentRepository) ListVisibilityQuery(ctx context.Context, f model.Fil
 	clauses, _ := q["$nor"].(bson.A)
 	q["$nor"] = append(clauses, exclusion)
 	return q, nil
+}
+
+func noticePolicyValid() bson.M {
+	return bson.M{"$and": bson.A{bson.M{"$eq": bson.A{"$notice_policy.version", noticepolicy.Version}}, bson.M{"$eq": bson.A{"$notice_policy.content_hash", "$content_hash"}}, bson.M{"$eq": bson.A{"$notice_policy.input_hash", "$schedule_input_hash"}}, bson.M{"$eq": bson.A{"$notice_policy.analysis_id", "$schedule_analysis_id"}}}}
 }

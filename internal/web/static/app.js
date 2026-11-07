@@ -1,6 +1,6 @@
 'use strict';
 const $=id=>document.getElementById(id);
-const state={page:1,limit:12,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false};
+const state={page:1,limit:12,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false,include_expired:false};
 let sources=[],categories=[],pageData=null,listController=null,detailController=null;
 const icons={all:'▦',academic:'▤',scholarship:'◇',international:'◎',international_student:'↗',extracurricular:'✦',teaching:'▧',volunteer:'♡',other:'···'};
 const reasons={missing_year:'연도 확인 필요',unsupported_datetime:'날짜·시각 근거 확인 필요',evidence_mismatch:'원문 근거 불일치',tentative_schedule:'변경될 수 있는 일정',conditional_deadline:'조건부 마감',source_conflict:'원문 내용 확인 필요',approximate_date:'대략적인 날짜',missing_date:'날짜 미상',missing_time:'시각 미기재',no_fixed_calendar:'확정 날짜 없음'};
@@ -17,7 +17,7 @@ function feedback(title,message,retry=false){const box=$('feedback');box.replace
 function filters(){
  const nav=$('categories');nav.replaceChildren();for(const c of [{id:'',label:'전체 공지'},...categories]){const b=el('button','category-button'+(state.category===c.id?' active':''));b.type='button';b.setAttribute('aria-pressed',String(state.category===c.id));b.append(el('span','category-icon',icons[c.id||'all']||'·'),el('span','',c.label));b.onclick=()=>{state.category=c.id;state.page=1;filters();load();};nav.append(b);}
  const tabs=$('sources');tabs.replaceChildren();for(const s of [{name:'',label:'전체',count:sources.reduce((a,s)=>a+s.count,0)},...sources]){const b=el('button','source-button'+(state.source===s.name?' active':''),s.label);b.type='button';b.setAttribute('aria-pressed',String(state.source===s.name));b.append(el('span','tab-count',String(s.count)));b.onclick=()=>{state.source=s.name;state.page=1;filters();load();};tabs.append(b);}
- $('query').value=state.query;$('sort').value=state.sort;$('status').value=state.status;$('has-schedule').checked=state.has_schedule;$('upcoming').checked=state.upcoming;
+ $('query').value=state.query;$('sort').value=state.sort;$('status').value=state.status;$('has-schedule').checked=state.has_schedule;$('upcoming').checked=state.upcoming;$('include-expired').checked=state.include_expired;
 }
 function range(s){const a=s.start_label,b=s.end_label;if(a&&b&&a!==b)return a+' ~ '+b;if(b)return b;if(a)return a;return '날짜 미상';}
 function important(schedules){return [...schedules].sort((a,b)=>{const rank=s=>(['application','submission','completion'].includes(s.type)?0:2)+(s.review_required?1:0);return rank(a)-rank(b);})[0];}
@@ -41,7 +41,7 @@ async function load(){
 }
 function section(title){const s=el('section','detail-section');s.append(el('h3','',title));return s;}
 function schedule(s){
- const a=el('article','schedule-item'+(s.parent_id?' child':''));const heading=el('div','schedule-heading');heading.append(el('h4','',s.label),el('span','schedule-state'+(s.review_required?' review':''),s.state));a.append(heading,el('p','schedule-dates',range(s)));if(s.scope)a.append(el('div','schedule-scope','구분 · '+s.scope));if(s.review_required){const r=s.review_reasons.map(v=>reasons[v]||'추가 원문 검토 필요');a.append(el('p','review-note','확정 일정으로 사용하지 마세요.'+(r.length?' '+[...new Set(r)].join(' · '):'')));}
+ const a=el('article','schedule-item'+(s.parent_id?' child':''));const heading=el('div','schedule-heading');heading.append(el('h4','',s.label),el('span','schedule-state'+(s.review_required?' review':''),s.state));a.append(heading,el('p','schedule-dates',range(s)));if(s.year_assumed)a.append(el('div','schedule-scope','연도는 사용자 기준연도 정책으로 보완했습니다.'));if(s.scope)a.append(el('div','schedule-scope','구분 · '+s.scope));if(s.review_required){const r=s.review_reasons.map(v=>reasons[v]||'추가 원문 검토 필요');a.append(el('p','review-note','확정 일정으로 사용하지 마세요.'+(r.length?' '+[...new Set(r)].join(' · '):'')));}
  const quotes=(s.evidence_spans||[]).filter(v=>v.location?.matched&&v.location.original_text).map(v=>v.location.original_text);if(!quotes.length&&s.evidence)quotes.push(s.evidence);if(quotes.length){const evidence=el('details');evidence.append(el('summary','','원문 근거 보기'));for(const q of [...new Set(quotes)])evidence.append(el('blockquote','',q));a.append(evidence);}return a;
 }
 async function detail(id){
@@ -61,9 +61,9 @@ async function boot(){
 $('login-form').addEventListener('submit',async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;$('login-error').textContent='';try{await api('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:$('token').value})});$('token').value='';await boot();}catch(e){$('login-error').textContent=e.message;}finally{button.disabled=false;}});
 $('logout').onclick=async()=>{try{await api('/api/session',{method:'DELETE'});showLogin();}catch(e){feedback('로그아웃에 실패했어요',e.message);}};
 $('search-form').addEventListener('submit',e=>{e.preventDefault();state.query=$('query').value.trim();state.page=1;load();});
-for(const [id,key]of [['sort','sort'],['status','status'],['upcoming','upcoming'],['has-schedule','has_schedule']])$(id).addEventListener('change',e=>{state[key]=e.target.type==='checkbox'?e.target.checked:e.target.value;state.page=1;load();});
-$('reset').onclick=()=>{Object.assign(state,{page:1,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false});filters();load();};
+for(const [id,key]of [['include-expired','include_expired'],['sort','sort'],['status','status'],['upcoming','upcoming'],['has-schedule','has_schedule']])$(id).addEventListener('change',e=>{state[key]=e.target.type==='checkbox'?e.target.checked:e.target.value;state.page=1;load();});
+$('reset').onclick=()=>{Object.assign(state,{page:1,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false,include_expired:false});filters();load();};
 $('prev').onclick=()=>{if(state.page>1){state.page--;load();$('sources').scrollIntoView({block:'start'});}};$('next').onclick=()=>{if(pageData&&state.page<pageData.pages){state.page++;load();$('sources').scrollIntoView({block:'start'});}};
 $('close-detail').onclick=()=>$('detail').close();$('detail').addEventListener('close',()=>detailController?.abort());$('detail').addEventListener('click',e=>{if(e.target===$('detail')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
-const params=new URLSearchParams(location.search);for(const k of ['query','source','category','status','sort'])if(params.has(k))state[k]=params.get(k);for(const k of ['upcoming','has_schedule'])state[k]=params.get(k)==='true';const p=Number(params.get('page'));if(Number.isInteger(p)&&p>=1&&p<=10000)state.page=p;
+const params=new URLSearchParams(location.search);for(const k of ['query','source','category','status','sort'])if(params.has(k))state[k]=params.get(k);for(const k of ['upcoming','has_schedule','include_expired'])state[k]=params.get(k)==='true';const p=Number(params.get('page'));if(Number.isInteger(p)&&p>=1&&p<=10000)state.page=p;
 boot();

@@ -4,6 +4,7 @@ import (
 	"context"
 	"example.com/crawlserver/internal/config"
 	"example.com/crawlserver/internal/model"
+	"example.com/crawlserver/internal/noticepolicy"
 	"example.com/crawlserver/internal/notices"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"os"
@@ -126,4 +127,26 @@ func TestNoticesIsolatedMongo(t *testing.T) {
 	if e != nil || n.Content != "본문" || !n.Analyzed {
 		t.Fatal(n, e)
 	}
+	past := time.Now().Add(-time.Hour)
+	policy := model.NoticePolicy{Version: noticepolicy.Version, ContentHash: items[0].ContentHash, InputHash: items[0].ScheduleInputHash, AnalysisID: items[0].ScheduleAnalysisID, ExpiresAt: &past, Schedules: items[0].Schedules}
+	if _, e = db.Collection("crawled_contents").UpdateOne(ctx, bson.M{"_id": items[0].ID}, bson.M{"$set": bson.M{"notice_policy": policy}}); e != nil {
+		t.Fatal(e)
+	}
+	f = notices.Filter{Page: 1, Limit: 12, Sort: "latest"}
+	page, e = store.Notices(ctx, f, now)
+	if e != nil || page.Total != 3 {
+		t.Fatal("expired policy not hidden", page, e)
+	}
+	f.IncludeExpired = true
+	page, e = store.Notices(ctx, f, now)
+	if e != nil || page.Total != 4 {
+		t.Fatal("explicit recovery failed", page, e)
+	}
+	db.Collection("crawled_contents").UpdateOne(ctx, bson.M{"_id": items[0].ID}, bson.M{"$set": bson.M{"content_hash": "updated input"}})
+	f.IncludeExpired = false
+	page, e = store.Notices(ctx, f, now)
+	if e != nil || page.Total != 4 {
+		t.Fatal("stale expiration policy applied", page, e)
+	}
+
 }

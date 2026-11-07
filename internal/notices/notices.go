@@ -4,6 +4,7 @@ package notices
 
 import (
 	"example.com/crawlserver/internal/model"
+	"example.com/crawlserver/internal/noticepolicy"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -16,6 +17,7 @@ var Seoul = time.FixedZone("Asia/Seoul", 9*3600)
 var CategoryLabels = map[string]string{"academic": "학사", "scholarship": "장학", "international": "국제교류", "international_student": "외국인 유학생", "extracurricular": "비교과·행사", "teaching": "교직", "volunteer": "봉사", "other": "기타", "unknown": "분류 확인 필요"}
 
 type Filter struct {
+	IncludeExpired                        bool
 	Query, Source, Category, Status, Sort string
 	HasSchedule, Upcoming                 *bool
 	Page, Limit                           int
@@ -23,7 +25,7 @@ type Filter struct {
 
 func Parse(q url.Values) (Filter, error) {
 	f := Filter{Page: 1, Limit: 12, Sort: "latest"}
-	allowed := map[string]bool{"query": true, "source": true, "category": true, "status": true, "sort": true, "has_schedule": true, "upcoming": true, "page": true, "limit": true}
+	allowed := map[string]bool{"query": true, "source": true, "category": true, "status": true, "sort": true, "has_schedule": true, "upcoming": true, "include_expired": true, "page": true, "limit": true}
 	for k, v := range q {
 		if !allowed[k] || len(v) != 1 {
 			return f, fmt.Errorf("알 수 없거나 중복된 검색 조건입니다")
@@ -40,6 +42,12 @@ func Parse(q url.Values) (Filter, error) {
 	}
 	if f.Page < 1 || f.Page > 10000 || f.Limit < 1 || f.Limit > 50 {
 		return f, fmt.Errorf("page는1~10000, limit은1~50입니다")
+	}
+	if v, ok := q["include_expired"]; ok {
+		if v[0] != "true" && v[0] != "false" {
+			return f, fmt.Errorf("include_expired는 true/false로 지정해 주세요")
+		}
+		f.IncludeExpired = v[0] == "true"
 	}
 	f.Query = strings.TrimSpace(q.Get("query"))
 	if !utf8.ValidString(f.Query) || utf8.RuneCountInString(f.Query) > 100 {
@@ -98,6 +106,7 @@ type Metadata struct {
 	VisibleCount int64      `json:"visible_count"`
 }
 type Schedule struct {
+	YearAssumed        bool                 `json:"year_assumed"`
 	ID                 string               `json:"id"`
 	ParentID           *string              `json:"parent_id"`
 	Type               string               `json:"type"`
@@ -251,7 +260,7 @@ func ScheduleView(s model.Schedule, now time.Time) Schedule {
 			}
 		}
 	}
-	return Schedule{ID: s.ID, ParentID: s.ParentID, Type: s.Type, Label: s.Label, StartPartial: s.StartPartial, EndPartial: s.EndPartial, Timezone: s.Timezone, Precision: s.Precision, Scope: s.Scope, Evidence: s.Evidence, Spans: s.EvidenceSpans, Review: review, Reasons: s.ReviewReasons, Quality: quality, State: state, StartLabel: dateLabel(s.StartDate, s.StartTime, s.StartPartial), EndLabel: dateLabel(s.EndDate, s.EndTime, s.EndPartial), Dates: DateFields{StartPrecision: s.StartPrecision, EndPrecision: s.EndPrecision, StartDate: s.StartDate, EndDate: s.EndDate, StartTime: s.StartTime, EndTime: s.EndTime}}
+	return Schedule{YearAssumed: noticepolicy.IsYearAssumed(s), ID: s.ID, ParentID: s.ParentID, Type: s.Type, Label: s.Label, StartPartial: s.StartPartial, EndPartial: s.EndPartial, Timezone: s.Timezone, Precision: s.Precision, Scope: s.Scope, Evidence: s.Evidence, Spans: s.EvidenceSpans, Review: review, Reasons: s.ReviewReasons, Quality: quality, State: state, StartLabel: dateLabel(s.StartDate, s.StartTime, s.StartPartial), EndLabel: dateLabel(s.EndDate, s.EndTime, s.EndPartial), Dates: DateFields{StartPrecision: s.StartPrecision, EndPrecision: s.EndPrecision, StartDate: s.StartDate, EndDate: s.EndDate, StartTime: s.StartTime, EndTime: s.EndTime}}
 }
 func View(v model.Content, detail bool, now time.Time) Notice {
 	analyzed := v.ScheduleAnalysisID != "" && v.ScheduleInputHash != "" && v.ScheduleModelVersion != "" && v.ScheduleExtractionVersion != ""
@@ -260,10 +269,18 @@ func View(v model.Content, detail bool, now time.Time) Notice {
 		n.Summary = ""
 		n.Audience = nil
 	}
+	if noticepolicy.Valid(v) {
+		n.Review = false
+		for _, s := range v.NoticePolicy.Schedules {
+			if s.ReviewRequired {
+				n.Review = true
+			}
+		}
+	}
 	if detail {
 		n.Content = v.Content
 	}
-	for _, s := range v.Schedules {
+	for _, s := range noticepolicy.Effective(v) {
 		if analyzed {
 			n.Schedules = append(n.Schedules, ScheduleView(s, now))
 		}

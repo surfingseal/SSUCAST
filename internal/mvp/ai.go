@@ -19,10 +19,12 @@ import (
 )
 
 const AIModel = "gemini-3.8-flash"
-const PromptVersion = "mvp-data-v1"
+const PromptVersion = "mvp-data-v2-user-year"
 
 func AIConfig(media bool) *genai.GenerateContentConfig {
 	c := scheduleflash.Config()
+	year := time.Now().In(time.FixedZone("Asia/Seoul", 9*3600)).Year()
+	c.SystemInstruction.Parts[0].Text += fmt.Sprintf("\n사용자가 승인한 연도 정책(기존 연도 추정 금지 지침의 예외): 현재 기준연도는 %d년이다. 연도가 생략된 월/일과 월 단위 일정은 이 기준연도로 해석한다. 공고에 2027년 등 명시적인 연도가 있으면 이를 우선 보존한다. 시각과 일자를 새로 생성하지 않는다. 연도 보완 근거는 사용자 기준연도 정책임을 review_reasons 또는 qualifiers에 year_assumed_user_policy로 구분한다. 월만 있으면 특정 일자를 생성하지 않는다. 연말 연초 범위가 역전되면 다음 해를 임의 생성하지 말고 검토 상태로 둔다.", year)
 	c.SystemInstruction.Parts[0].Text += "\n이번 저장 작업의 요약은 가능하면 70자 내외의 한 문장으로 작성하고 절대 100자를 넘지 않는다. 본문이 이미지/첨부 참조만 있으면 확인되지 않은 내용을 만들지 않는다."
 	if media {
 		c.SystemInstruction.Parts[0].Text += "\n이 출처는 공식 카테고리가 없다. category는 academic/scholarship/international/international_student/extracurricular/teaching/volunteer/other 중 하나로 분류한다. category_reason은 목적에 근거한 짧은 설명, category_evidence는 제목 또는 본문의 연속된 실제 인용 문자열 배열이다. 학과 공지라는 이유만으로 academic으로 정하지 않는다. 근거 부족이면 other 및 review_required=true로 두고 review_reasons에 사유를 넣는다. 이미지/첨부는 분석하지 않는다. 외부 URL을 열지 않는다."

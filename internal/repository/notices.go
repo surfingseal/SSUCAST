@@ -13,7 +13,7 @@ import (
 
 func noticeProjection(detail bool) bson.M {
 	p := bson.M{}
-	for _, k := range []string{"title", "summary", "source_name", "category", "categories", "classification_method", "published_at", "original_url", "status", "target_audience", "target_audience_review_required", "summary_review_required", "schedule_analysis_id", "schedule_input_hash", "schedule_model_version", "schedule_extraction_version", "schedule_review_required", "schedules"} {
+	for _, k := range []string{"title", "summary", "source_name", "category", "categories", "classification_method", "published_at", "original_url", "status", "target_audience", "target_audience_review_required", "summary_review_required", "schedule_analysis_id", "schedule_input_hash", "schedule_model_version", "schedule_extraction_version", "schedule_review_required", "schedules", "content_hash", "notice_policy"} {
 		p[k] = 1
 	}
 	if detail {
@@ -22,7 +22,7 @@ func noticeProjection(detail bool) bson.M {
 	return p
 }
 func (s *ContentRepository) noticeMatch(ctx context.Context, f notices.Filter) (bson.M, error) {
-	base, e := s.ListVisibilityQuery(ctx, model.Filter{SourceName: f.Source, Category: f.Category, IncludeCompleted: f.Status == "완료"})
+	base, e := s.ListVisibilityQuery(ctx, model.Filter{SourceName: f.Source, Category: f.Category, IncludeCompleted: f.Status == "완료", IncludeExpired: f.IncludeExpired})
 	if e != nil {
 		return nil, e
 	}
@@ -74,7 +74,7 @@ func noticesPipeline(match bson.M, f notices.Filter, now time.Time) mongo.Pipeli
 		}
 		return op("$min", op("$filter", bson.M{"input": mapped, "as": "d", "cond": all(op("$ne", bson.A{"$$d", nil}), op("$gte", bson.A{"$$d", nowKey}))}))
 	}
-	p := mongo.Pipeline{bson.D{{Key: "$match", Value: match}}}
+	p := mongo.Pipeline{bson.D{{Key: "$match", Value: match}}, bson.D{{Key: "$set", Value: bson.M{"schedules": bson.M{"$cond": bson.A{noticePolicyValid(), "$notice_policy.schedules", "$schedules"}}}}}}
 	if f.Sort != "latest" || f.Upcoming != nil {
 		p = append(p, bson.D{{Key: "$set", Value: bson.M{"__deadline": dates("deadline"), "__event": dates("event"), "__upcoming": dates("all")}}})
 	}

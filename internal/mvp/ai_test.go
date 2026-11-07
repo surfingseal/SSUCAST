@@ -1,11 +1,11 @@
 package mvp
 
 import (
- "example.com/crawlserver/internal/testutil/localfixture"
 	"encoding/json"
 	"example.com/crawlserver/internal/model"
 	"example.com/crawlserver/internal/scheduleapply"
 	"example.com/crawlserver/internal/schedulebatch"
+	"example.com/crawlserver/internal/testutil/localfixture"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"os"
 	"testing"
@@ -85,8 +85,8 @@ func TestActualCombinedMedia14(t *testing.T) {
 			Checkpoint schedulebatch.Checkpoint `json:"checkpoint"`
 		} `json:"rows"`
 	}
-	localfixture.Require(t,"testdata/media14.json")
- if e := Read("testdata/media14.json", &f); e != nil {
+	localfixture.Require(t, "testdata/media14.json")
+	if e := Read("testdata/media14.json", &f); e != nil {
 		t.Fatal(e)
 	}
 	if len(f.Rows) != 14 || f.Source.Enabled {

@@ -1,7 +1,6 @@
 package repository_test
 
 import (
- "example.com/crawlserver/internal/testutil/localfixture"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -11,6 +10,7 @@ import (
 	"example.com/crawlserver/internal/repository"
 	"example.com/crawlserver/internal/scheduleapply"
 	"example.com/crawlserver/internal/schedules"
+	"example.com/crawlserver/internal/testutil/localfixture"
 	"fmt"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"net/http"

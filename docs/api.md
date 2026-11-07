@@ -51,3 +51,7 @@ count는 기본 완료/만료 노출 정책 기준이고 현재 필터의 결과
 `{items:[{id,label}]}`. academic/학사, scholarship/장학, international/국제교류, international_student/외국인 유학생, extracurricular/비교과·행사, teaching/교직, volunteer/봉사, other/기타. 기존 정의를 재사용한다.
 
 기존 관리자 `/api/v1/*`는 `cmd/server`에서 그대로 유지한다. 학생용 `cmd/web`는 읽기 전용으로 별도 실행하며 관리자 수집 작업 API를 노출하지 않는다.
+
+### 지난 기한 조회 (2026-11-07 추가)
+
+`include_expired=true`로 확인된 신청·제출·이수 기한이 지나 숨겨진 공고를 다시 조회한다. 기본값false이며 기존 슈캐치 완료 제외 정책은 별도로 유지된다. 현재 기본75건(슈캐치67+학부8), include_expired=true는100건이다. 공고/분류/lifecycle/raw 분석은 삭제하거나 변경하지 않았다. 상세 일정의 `year_assumed=true`는 사용자 승인 연도 보완이며 원문에 명시된 연도와 구분한다.
