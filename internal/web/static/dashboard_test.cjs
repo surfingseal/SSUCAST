@@ -14,4 +14,11 @@ const report={todayDate:'2026-11-16',forecast:[{date:'2026-11-16',deadlines:[{no
 assert.deepEqual(ui.todayDeadlines(report),[{noticeId:'today'}]);
 assert.deepEqual(ui.todayDeadlines({todayDate:'2026-11-18',forecast:report.forecast}),[]);
 for(const level of ['clear','cloudy','rain','storm'])assert.match(ui.weatherAsset(level),/^\/figma\/\w+\.png$/);
+assert.deepEqual(ui.paginationPages(1,1),[1]);
+assert.deepEqual(ui.paginationPages(1,3),[1,2,3]);
+assert.deepEqual(ui.paginationPages(1,9),[1,2,3,4,5]);
+assert.deepEqual(ui.paginationPages(5,9),[1,2,3,4,5]);
+assert.deepEqual(ui.paginationPages(6,9),[6,7,8,9]);
+assert.deepEqual(ui.paginationPages(9,9),[6,7,8,9]);
+assert.deepEqual(ui.paginationPages(6,12),[6,7,8,9,10]);
 console.log('DASHBOARD CLOCK, DATE, TODAY FILTER AND ASSET TESTS PASSED');

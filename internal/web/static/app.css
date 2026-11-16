@@ -658,8 +658,7 @@ h2 {
 }
 .categories {
   gap:12px;
-  padding-bottom:16px;
-  border-bottom:1px solid var(--line)
+  margin-bottom:14px
 }
 .source-button,.category-button {
   background:var(--card);
@@ -686,8 +685,10 @@ h2 {
   justify-content:space-between;
   align-items:center;
   gap:18px;
-  min-height:69px;
-  margin-bottom:2px
+  min-height:56px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:0
 }
 .toolbar>p {
   font-size:20px
@@ -712,13 +713,30 @@ h2 {
   vertical-align:-1px;
   margin-right:5px
 }
+.sort-select {
+  position:relative;
+  display:inline-flex;
+  align-items:center
+}
 .toolbar select {
+  appearance:none;
+  -webkit-appearance:none;
   border:1px solid var(--line);
   border-radius:22px;
   background:var(--card);
-  padding:7px 20px;
-  width:152px;
-  font-size:16px
+  padding:7px 38px 7px 18px;
+  min-width:144px;
+  font-size:16px;
+  cursor:pointer
+}
+.sort-chevron {
+  position:absolute;
+  right:16px;
+  width:16px;
+  height:16px;
+  pointer-events:none;
+  color:var(--text);
+  opacity:.82
 }
 .cards {
   display:grid;
@@ -1720,7 +1738,7 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
     margin-bottom:8px
   }
   .categories {
-    padding-bottom:14px
+    margin-bottom:8px
   }
   .source-button,.category-button {
     font-size:12px;
@@ -1733,7 +1751,7 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
   .toolbar {
     gap:8px;
     flex-wrap:wrap;
-    padding:14px 0;
+    padding:4px 0 12px;
     min-height:0
   }
   .toolbar>p {
@@ -1752,9 +1770,15 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
     font-size:20px
   }
   .toolbar select {
-    width:120px;
+    min-width:124px;
+    width:124px;
     font-size:13px;
-    padding:7px 12px
+    padding:7px 32px 7px 14px
+  }
+  .sort-chevron {
+    right:12px;
+    width:14px;
+    height:14px
   }
   .card {
     height:190px;
@@ -1821,7 +1845,9 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
     align-items:flex-start
   }
   .pagination {
-    gap:7px
+    gap:7px;
+    flex-wrap:wrap;
+    justify-content:center
   }
   .page-button {
     padding:6px 12px;
@@ -2021,6 +2047,7 @@ body[data-view="explore"] .explore-section {
 .explore-section > .search,
 .explore-section > .source-tabs,
 .explore-section > .categories,
+.explore-section > .toolbar,
 .explore-section > .explore-footer { flex-shrink: 0; }
 .explore-results {
   width: 100%;
@@ -2031,6 +2058,7 @@ body[data-view="explore"] .explore-section {
   overflow-y: auto;
   overscroll-behavior-y: contain;
   scrollbar-gutter: stable;
+  padding-top: 16px;
   padding-bottom: 12px;
   scroll-padding-block: 12px;
 }

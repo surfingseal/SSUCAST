@@ -1,6 +1,6 @@
 'use strict';
 const $=id=>document.getElementById(id);
-const state={page:1,limit:6,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false,include_expired:false};
+const state={page:1,limit:8,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false,include_expired:false};
 const INTEREST_STORAGE_KEY='ssu_cast_interests_v1';
 let currentView=location.hash==='#explore'?'explore':'home';
 let sources=[],categories=[],pageData=null,listController=null,detailController=null,weatherNotices=[],weatherAsOf=null,selectedForecastDate=null,userInterests=loadSavedInterests();
@@ -13,7 +13,7 @@ async function api(path,options={}){const r=await fetch(path,{credentials:'same-
 function showLogin(){if($('detail').open)$('detail').close();$('login').classList.remove('hidden');$('app').classList.add('hidden');$('logout').classList.add('hidden');}
 function showApp(){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('logout').classList.remove('hidden');}
 function parameters(){const p=new URLSearchParams();if(state.query)p.set('search_in','title');for(const [k,v]of Object.entries(state)){if(v!==''&&v!==false)p.set(k,String(v));}return p;}
-function remember(){history.replaceState(null,'','/?'+parameters()+(currentView==='explore'?'#explore':'#home'));}
+function remember(){const p=parameters();p.delete('limit');history.replaceState(null,'','/?'+p+(currentView==='explore'?'#explore':'#home'));}
 function feedback(title,message,retry=false){const box=$('feedback');box.replaceChildren(el('strong','',title),el('p','',message));if(retry){const b=el('button','primary','다시 불러오기');b.type='button';b.onclick=typeof retry==='function'?retry:()=>load();box.append(b);}box.classList.remove('hidden');}
 function filters(){
  const nav=$('categories');nav.replaceChildren();for(const c of [{id:'',label:'전체'},...categories]){const b=el('button','category-button'+(state.category===c.id?' active':''));b.type='button';b.setAttribute('aria-pressed',String(state.category===c.id));b.append(el('span','',c.label));b.onclick=()=>{state.category=c.id;state.page=1;filters();load();};nav.append(b);}
@@ -53,9 +53,9 @@ function card(n){
  bottom.append(preview,more);a.append(bottom);return a;
 }
 function renderPagination(data){
- const box=$('page-numbers');box.replaceChildren();const pages=Math.max(1,data.pages);
- const start=Math.max(1,Math.min(data.page-1,pages-2));
- for(let page=start;page<=Math.min(pages,start+2);page++){
+ const box=$('page-numbers');box.replaceChildren();
+ const list=window.SSUDashboard?.paginationPages(data.page,data.pages)||[1];
+ for(const page of list){
   const b=el('button','page-number'+(data.page===page?' current':''),String(page));b.type='button';b.setAttribute('aria-label',page+'페이지');if(data.page===page)b.setAttribute('aria-current','page');
   b.onclick=()=>{state.page=page;load();$('explore-results').scrollTop=0;};box.append(b);
  }
@@ -236,5 +236,5 @@ setInterval(()=>{updateClock();if(weatherNotices.length){weatherAsOf=new Date().
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){updateClock();weatherAsOf=new Date().toISOString();if(weatherNotices.length)renderWeather();}});
 $('theme-toggle').onclick=()=>{const light=document.documentElement.dataset.theme!=='light';document.documentElement.dataset.theme=light?'light':'dark';$('theme-toggle').setAttribute('aria-pressed',String(light));$('theme-toggle').setAttribute('aria-label',light?'어두운 테마로 전환':'밝은 테마로 전환');};
 switchView();
-const params=new URLSearchParams(location.search);for(const k of ['query','source','category','status','sort'])if(params.has(k))state[k]=params.get(k);for(const k of ['upcoming','has_schedule','include_expired'])state[k]=params.get(k)==='true';const limit=Number(params.get('limit'));if(Number.isInteger(limit)&&limit>=1&&limit<=50)state.limit=limit;const p=Number(params.get('page'));if(Number.isInteger(p)&&p>=1&&p<=10000)state.page=p;
+const params=new URLSearchParams(location.search);for(const k of ['query','source','category','status','sort'])if(params.has(k))state[k]=params.get(k);for(const k of ['upcoming','has_schedule','include_expired'])state[k]=params.get(k)==='true';const p=Number(params.get('page'));if(Number.isInteger(p)&&p>=1&&p<=10000)state.page=p;
 boot();
