@@ -148,6 +148,7 @@ function renderSpotlight(report){
  const dayPrefix=isToday?'오늘':`${day.shortDate} (${day.weekday})`;
  $('spotlight-title').textContent=isToday?'오늘 마감되는 공고':`${dayPrefix} 마감되는 공고`;
  $('today-count').textContent=deadlines.length+'건';
+ grid.dataset.count=String(deadlines.length);grid.classList.toggle('few-notices',deadlines.length<=2);
  if(!deadlines.length){grid.append(el('p','spotlight-empty',isToday?'오늘 마감되는 공고가 없습니다.':`${dayPrefix}에 마감되는 공고가 없습니다.`));return;}
  for(const d of deadlines){
   const btn=el('button','spotlight-item');btn.type='button';btn.onclick=()=>detail(d.noticeId);
