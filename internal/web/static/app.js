@@ -135,46 +135,24 @@ function renderInterestChips(){
   box.append(b);
  }
 }
-function renderSelectedDayPanel(report){
+function renderSelectedDayPanel(){
  const panel=$('weather-day-panel');if(!panel)return;
- const day=report.forecast.find(f=>f.date===selectedForecastDate);
- if(!day){panel.classList.add('hidden');panel.replaceChildren();return;}
- panel.classList.remove('hidden');
- const head=el('div','weather-day-head');
- head.append(el('h3','',`${day.shortDate} (${day.weekday}) 모집 마감 공고 · ${day.dayCount}건 (${day.label})`));
- const closeBtn=el('button','quiet','닫기');closeBtn.type='button';
- closeBtn.onclick=()=>{selectedForecastDate=null;renderWeather();};
- head.append(closeBtn);
- panel.replaceChildren(head);
- if(!day.deadlines.length){
-  const msg=day.dataState==='unverified_only'?'이 날짜에는 모집 마감이 없으며, 원문 확인이 필요한 미검증 일정만 존재합니다. 아래 확인 필요 목록을 참고해 주세요.':'이 날짜에 마감되는 모집 공고가 없습니다.';
-  panel.append(el('p','weather-summary',msg));
-  return;
- }
- const list=el('div','weather-day-list');
- for(const d of day.deadlines){
-  const item=el('button','weather-day-item');item.type='button';
-  item.onclick=()=>detail(d.noticeId);
-  const main=el('div','weather-day-item-main');
-  main.append(el('span','weather-day-item-title',d.noticeTitle));
-  const meta=el('div','weather-day-item-meta');
-  const extra=d.extraScheduleCount>0?` (외 ${d.extraScheduleCount}개 마감 일정)`:'';
-  meta.append(el('span','category-tag '+d.category,categoryLabel(d.category)),el('span','',d.scheduleLabel+extra),el('span','',d.displayLabel));
-  main.append(meta);
-  item.append(main,el('span','weather-day-item-time',d.remainingLabel));
-  list.append(item);
- }
- panel.append(list);
+ panel.classList.add('hidden');panel.replaceChildren();
 }
 function renderSpotlight(report){
  const grid=$('urgent-spotlight');grid.replaceChildren();
- const deadlines=window.SSUDashboard.todayDeadlines(report);
+ const activeDate=selectedForecastDate||report.todayDate;
+ const day=report.forecast.find(f=>f.date===activeDate);
+ const isToday=!day||day.isToday||day.date===report.todayDate;
+ const deadlines=isToday?window.SSUDashboard.todayDeadlines(report):(day.deadlines||[]);
+ const dayPrefix=isToday?'오늘':`${day.shortDate} (${day.weekday})`;
+ $('spotlight-title').textContent=isToday?'오늘 마감되는 공고':`${dayPrefix} 마감되는 공고`;
  $('today-count').textContent=deadlines.length+'건';
- if(!deadlines.length){grid.append(el('p','spotlight-empty','오늘 마감되는 공고가 없습니다.'));return;}
+ if(!deadlines.length){grid.append(el('p','spotlight-empty',isToday?'오늘 마감되는 공고가 없습니다.':`${dayPrefix}에 마감되는 공고가 없습니다.`));return;}
  for(const d of deadlines){
   const btn=el('button','spotlight-item');btn.type='button';btn.onclick=()=>detail(d.noticeId);
   const time=d.endTime||'시각 미기재';
-  btn.append(el('span','category-tag',categoryLabel(d.category)),el('span','spotlight-item-title',d.noticeTitle),el('span','spotlight-item-date','오늘 마감 · '+time));grid.append(btn);
+  btn.append(el('span','category-tag',categoryLabel(d.category)),el('span','spotlight-item-title',d.noticeTitle),el('span','spotlight-item-date',`${dayPrefix} 마감 · `+time));grid.append(btn);
  }
 }
 function renderWeather(){
@@ -198,16 +176,15 @@ function renderWeather(){
  const strip=$('weather-forecast');strip.replaceChildren();
  for(const day of report.forecast){
   const isHighlighted=activeHighlightDate===day.date;
-  const isExpanded=selectedForecastDate===day.date;
   const b=el('button','forecast-day'+(day.isToday?' is-today':'')+(isHighlighted?' selected':''));
-  b.type='button';b.setAttribute('aria-pressed',String(isExpanded));
+  b.type='button';b.setAttribute('aria-pressed',String(isHighlighted));
   const countText=day.dayCount+'건';
   const countCls=day.dayCount>0?'':day.dataState==='unverified_only'?' unverified':' empty';
   b.setAttribute('aria-label',`${day.isToday?'오늘':day.shortDate+' '+day.weekday+'요일'} ${countText}, 날씨 ${day.label}`);
   const dateBox=el('span','forecast-day-date');dateBox.append(el('span','forecast-date',day.isToday?'오늘':day.weekday),el('span','forecast-shortdate',day.shortDate));b.append(dateBox);
   const iconBox=el('span','forecast-icon');iconBox.append(buildSmallWeatherSvg(day.level));
   b.append(iconBox,el('span','forecast-count'+countCls,countText));
-  b.onclick=()=>{selectedForecastDate=isExpanded?null:day.date;renderWeather();};
+  b.onclick=()=>{selectedForecastDate=(day.date===report.todayDate||selectedForecastDate===day.date)?null:day.date;renderWeather();};
   strip.append(b);
  }
 
