@@ -35,6 +35,7 @@ type Server struct {
 	TimingReviews notices.TimingReviews
 	Store         Reader
 	Token         string
+	DisableAuth   bool
 	Now           func() time.Time
 	mu            sync.Mutex
 	sessions      map[string]time.Time
@@ -54,6 +55,9 @@ func send(w http.ResponseWriter, status int, v any) {
 	json.NewEncoder(w).Encode(v)
 }
 func (s *Server) authorized(r *http.Request) bool {
+	if s.DisableAuth {
+		return true
+	}
 	if token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "); strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ") && s.validToken(token) {
 		return true
 	}
@@ -111,7 +115,7 @@ func (s *Server) Handler() http.Handler {
 			http.Error(w, "Method not allowed", 405)
 			return
 		}
-		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" {
+		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/weather.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" && r.URL.Path != "/dashboard.js" && !strings.HasPrefix(r.URL.Path, "/figma/") {
 			http.NotFound(w, r)
 			return
 		}

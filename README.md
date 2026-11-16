@@ -243,3 +243,9 @@ NODE_PATH=/tmp/ssu-web-e2e/node_modules node scripts/web-e2e.cjs
 | 기한 관리·백업·dry-run | [만료 관리](docs/lifecycle.md) |
 
 과거 단계의 문서는 당시 검증 범위를 포함할 수 있습니다. 최신 실행 방법은 이 README와 현재 코드를 기준으로 확인하세요. 실제 실행 보고서·스크린샷·백업은 로컬 `outputs/`에 보관합니다.
+
+## 홈·공고 탐색 화면
+
+`cmd/web`의 홈(`/#home`)과 공고 탐색(`/#explore`)은 Figma Dark Mood 원본 자산/패널 스타일을 사용합니다. 홈에서 오늘 마감 및 7일 예보를 보고, 탐색 탭에서 공고명·출처·카테고리로 검색합니다. 제목 검색은 선택적인 `search_in=title` 조건을 사용하며 기존 API의 기본 검색 범위는 유지합니다.
+
+레이아웃, 원본 자산 대응, 시간대별 인사말과 검증 결과는 [디자인 구현 기록](docs/design-implementation-2026-11-16.md)을 참고하세요.

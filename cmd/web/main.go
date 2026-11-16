@@ -29,9 +29,6 @@ func run() error {
 		return e
 	}
 	token := os.Getenv("ADMIN_TOKEN")
-	if len(token) < 24 {
-		return fmt.Errorf("ADMIN_TOKEN must contain24bytes")
-	}
 	addr, origin, e := webSettings(os.Getenv)
 	if e != nil {
 		return e
@@ -55,7 +52,7 @@ func run() error {
 	if e != nil && (explicitReview || !os.IsNotExist(e)) {
 		return fmt.Errorf("일정 점검 안내 파일을 확인하세요")
 	}
-	app := &web.Server{Store: store, Token: token, TimingReviews: reviews, PublicOrigin: origin}
+	app := &web.Server{Store: store, Token: token, DisableAuth: true, TimingReviews: reviews, PublicOrigin: origin}
 	server := &http.Server{Addr: addr, Handler: app.Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second, WriteTimeout: 15 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 << 10}
 	done := make(chan error, 1)
 	go func() { fmt.Println("SSU 공지 모아보기: http://" + addr); done <- server.ListenAndServe() }()

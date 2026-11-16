@@ -109,6 +109,17 @@ func TestNoticesIsolatedMongo(t *testing.T) {
 	if e != nil || page.Total != 1 || page.Items[0].Source != "ssu_global_media" {
 		t.Fatal(page, e)
 	}
+	f.SearchIn = "title"
+	page, e = store.Notices(ctx, f, now)
+	if e != nil || page.Total != 0 {
+		t.Fatal("title-only search matched body", page, e)
+	}
+	f.Query = "장학"
+	page, e = store.Notices(ctx, f, now)
+	if e != nil || page.Total != 1 || page.Items[0].Title != "장학 모집" {
+		t.Fatal("title-only search", page, e)
+	}
+	f.SearchIn = ""
 	f.Query = ".*"
 	page, e = store.Notices(ctx, f, now)
 	if e != nil || page.Total != 0 {

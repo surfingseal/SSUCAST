@@ -1,0 +1,114 @@
+{
+  "fileKey": "mGY5X3UrF13zDq9uAPvPuf",
+  "frame": "1:209",
+  "assets": [
+    {
+      "name": "imgEllipse1",
+      "file": "cfc22.png"
+    },
+    {
+      "name": "imgRainCloud",
+      "file": "1022f.png"
+    },
+    {
+      "name": "imgImage9",
+      "file": "8cbdf.png"
+    },
+    {
+      "name": "imgImage10",
+      "file": "c6988.png"
+    },
+    {
+      "name": "imgImage8",
+      "file": "b0372.png"
+    },
+    {
+      "name": "imgImage7",
+      "file": "001c7.png"
+    },
+    {
+      "name": "imgStorm",
+      "file": "8e098.png"
+    },
+    {
+      "name": "imgFlowbiteSearchOutline",
+      "file": "485a1.svg"
+    },
+    {
+      "name": "imgIconoirSunLight",
+      "file": "d5a58.svg"
+    },
+    {
+      "name": "imgGroup2",
+      "file": "1a992.svg"
+    },
+    {
+      "name": "imgIconamoonArrowDown2Duotone",
+      "file": "c9c63.svg"
+    },
+    {
+      "name": "imgIcRoundMenu",
+      "file": "7b602.svg"
+    },
+    {
+      "name": "imgMageDashboardFill",
+      "file": "a1e7c.svg"
+    },
+    {
+      "name": "imgMaterialSymbolsHelp",
+      "file": "25cce.svg"
+    },
+    {
+      "name": "imgSolarMapLinear",
+      "file": "98f93.svg"
+    },
+    {
+      "name": "imgUilCalender",
+      "file": "982c3.svg"
+    },
+    {
+      "name": "imgGroup",
+      "file": "fb3f6.svg"
+    },
+    {
+      "name": "imgVector",
+      "file": "226b0.svg"
+    },
+    {
+      "name": "imgUilSetting",
+      "file": "eacf2.svg"
+    },
+    {
+      "name": "imgFluentLocation20Regular",
+      "file": "9b069.svg"
+    },
+    {
+      "name": "imgTablerTemperatureCelsius",
+      "file": "bc895.svg"
+    },
+    {
+      "name": "imgIconamoonArrowDown2Duotone1",
+      "file": "0d77a.svg"
+    },
+    {
+      "name": "imgGroup1",
+      "file": "ebfbc.svg"
+    },
+    {
+      "name": "imgCarbonHumidity",
+      "file": "17d94.svg"
+    },
+    {
+      "name": "imgHugeiconsUv02",
+      "file": "16894.svg"
+    },
+    {
+      "name": "imgRiEyeLine",
+      "file": "4bbfe.svg"
+    },
+    {
+      "name": "imgLine1",
+      "file": "fcddd.svg"
+    }
+  ]
+}

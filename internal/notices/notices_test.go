@@ -9,12 +9,12 @@ import (
 
 func ptr(s string) *string { return &s }
 func TestFilters(t *testing.T) {
-	for _, q := range []string{"query=장학&source=ssu_catch&category=scholarship&page=2&limit=12", "upcoming=false&has_schedule=true&status=unknown&sort=event"} {
+	for _, q := range []string{"query=장학&search_in=title", "query=장학&source=ssu_catch&category=scholarship&page=2&limit=12", "upcoming=false&has_schedule=true&status=unknown&sort=event"} {
 		if _, e := Parse(mustURL(q)); e != nil {
 			t.Fatal(e)
 		}
 	}
-	for _, q := range []string{"page=0", "page=10001", "limit=51", "query=a&query=b", "sort=random", "has_schedule=1", "category=career", "source=%24where", "status=anything", "query=%00", "unknown=1"} {
+	for _, q := range []string{"search_in=content", "search_in=title&search_in=title", "page=0", "page=10001", "limit=51", "query=a&query=b", "sort=random", "has_schedule=1", "category=career", "source=%24where", "status=anything", "query=%00", "unknown=1"} {
 		if _, e := Parse(mustURL(q)); e == nil {
 			t.Fatal("accepted", q)
 		}

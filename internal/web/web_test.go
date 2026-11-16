@@ -49,8 +49,11 @@ func TestProtectedReadOnlyAPI(t *testing.T) {
 	f := &fake{}
 	s := &Server{Store: f, Token: testToken}
 	h := s.Handler()
-	if w := call(h, "GET", "/", "", false); w.Code != 200 || !strings.Contains(w.Body.String(), "SSU 공지 모아보기") || strings.Contains(w.Body.String(), testToken) {
+	if w := call(h, "GET", "/", "", false); w.Code != 200 || !strings.Contains(w.Body.String(), "숭실대학교 공고 모아보기") || strings.Contains(w.Body.String(), testToken) {
 		t.Fatal("shell")
+	}
+	if w := call(h, "GET", "/weather.js", "", false); w.Code != 200 || !strings.Contains(w.Body.String(), "evaluateDeadlineWeather") {
+		t.Fatal("weather.js")
 	}
 	if w := call(h, "GET", "/api/notices", "", false); w.Code != 401 {
 		t.Fatal(w.Code)
@@ -146,5 +149,23 @@ func TestHTTPSProxyOriginAndHealth(t *testing.T) {
 	h.ServeHTTP(w, req)
 	if w.Code != 401 {
 		t.Fatal("deployment disabled authentication")
+	}
+}
+
+func TestDashboardAssetsAndTitleSearch(t *testing.T) {
+	f := &fake{}
+	h := (&Server{Store: f, Token: testToken}).Handler()
+	for _, path := range []string{"/dashboard.js", "/figma/8e098.png", "/figma/982c3.svg"} {
+		w := call(h, "GET", path, "", false)
+		if w.Code != 200 || w.Body.Len() == 0 {
+			t.Fatalf("asset %s: %d", path, w.Code)
+		}
+	}
+	if w := call(h, "GET", "/dashboard_test.cjs", "", false); w.Code != 404 {
+		t.Fatal("test source exposed")
+	}
+	w := call(h, "GET", "/api/notices?query=장학&search_in=title", "", true)
+	if w.Code != 200 || f.filter.SearchIn != "title" {
+		t.Fatalf("title search: %d", w.Code)
 	}
 }

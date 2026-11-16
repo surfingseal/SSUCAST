@@ -31,8 +31,7 @@ func (s *ContentRepository) noticeMatch(ctx context.Context, f notices.Filter) (
 		and = append(and, bson.M{"status": f.Status})
 	}
 	if f.Query != "" {
-		r := bson.Regex{Pattern: regexp.QuoteMeta(f.Query), Options: "i"}
-		and = append(and, bson.M{"$or": bson.A{bson.M{"title": r}, bson.M{"summary": r}, bson.M{"content": r}}})
+		and = append(and, noticeSearchMatch(f))
 	}
 	if f.HasSchedule != nil {
 		if *f.HasSchedule {
@@ -42,6 +41,15 @@ func (s *ContentRepository) noticeMatch(ctx context.Context, f notices.Filter) (
 		}
 	}
 	return bson.M{"$and": and}, nil
+}
+
+// Legacy callers search all text; the explorer opts into title-only matching.
+func noticeSearchMatch(f notices.Filter) bson.M {
+	r := bson.Regex{Pattern: regexp.QuoteMeta(f.Query), Options: "i"}
+	if f.SearchIn == "title" {
+		return bson.M{"title": r}
+	}
+	return bson.M{"$or": bson.A{bson.M{"title": r}, bson.M{"summary": r}, bson.M{"content": r}}}
 }
 func op(k string, v any) bson.M { return bson.M{k: v} }
 func eq(a, b any) bson.M        { return op("$eq", bson.A{a, b}) }

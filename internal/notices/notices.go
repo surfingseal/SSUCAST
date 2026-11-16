@@ -17,15 +17,15 @@ var Seoul = time.FixedZone("Asia/Seoul", 9*3600)
 var CategoryLabels = map[string]string{"academic": "학사", "scholarship": "장학", "international": "국제교류", "international_student": "외국인 유학생", "extracurricular": "비교과·행사", "teaching": "교직", "volunteer": "봉사", "other": "기타", "unknown": "분류 확인 필요"}
 
 type Filter struct {
-	IncludeExpired                        bool
-	Query, Source, Category, Status, Sort string
-	HasSchedule, Upcoming                 *bool
-	Page, Limit                           int
+	IncludeExpired                                  bool
+	Query, Source, Category, Status, Sort, SearchIn string
+	HasSchedule, Upcoming                           *bool
+	Page, Limit                                     int
 }
 
 func Parse(q url.Values) (Filter, error) {
 	f := Filter{Page: 1, Limit: 12, Sort: "latest"}
-	allowed := map[string]bool{"query": true, "source": true, "category": true, "status": true, "sort": true, "has_schedule": true, "upcoming": true, "include_expired": true, "page": true, "limit": true}
+	allowed := map[string]bool{"query": true, "search_in": true, "source": true, "category": true, "status": true, "sort": true, "has_schedule": true, "upcoming": true, "include_expired": true, "page": true, "limit": true}
 	for k, v := range q {
 		if !allowed[k] || len(v) != 1 {
 			return f, fmt.Errorf("알 수 없거나 중복된 검색 조건입니다")
@@ -57,6 +57,10 @@ func Parse(q url.Values) (Filter, error) {
 		if r < ' ' {
 			return f, fmt.Errorf("검색어에 제어 문자를 사용할 수 없습니다")
 		}
+	}
+	f.SearchIn = q.Get("search_in")
+	if f.SearchIn != "" && f.SearchIn != "title" {
+		return f, fmt.Errorf("search_in은 title로 지정해 주세요")
 	}
 	f.Source = q.Get("source")
 	if len(f.Source) > 80 {
