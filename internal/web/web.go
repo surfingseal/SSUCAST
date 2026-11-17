@@ -115,7 +115,15 @@ func (s *Server) Handler() http.Handler {
 			http.Error(w, "Method not allowed", 405)
 			return
 		}
-		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/weather.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" && r.URL.Path != "/dashboard.js" && !strings.HasPrefix(r.URL.Path, "/figma/") {
+		switch {
+		case r.URL.Path == "/simulation", r.URL.Path == "/simulation/", r.URL.Path == "/simulation/index.html":
+			w.Header().Set("Cache-Control", "no-cache")
+			http.Redirect(w, r, "/#simulation", http.StatusTemporaryRedirect)
+			return
+		case r.URL.Path == "/", r.URL.Path == "/app.js", r.URL.Path == "/weather.js",
+			r.URL.Path == "/app.css", r.URL.Path == "/favicon.svg", r.URL.Path == "/dashboard.js",
+			strings.HasPrefix(r.URL.Path, "/figma/"), strings.HasPrefix(r.URL.Path, "/simulation/"):
+		default:
 			http.NotFound(w, r)
 			return
 		}

@@ -169,3 +169,24 @@ func TestDashboardAssetsAndTitleSearch(t *testing.T) {
 		t.Fatalf("title search: %d", w.Code)
 	}
 }
+
+func TestSimulationAssets(t *testing.T) {
+	h := (&Server{}).Handler()
+	if w := call(h, "GET", "/", "", false); !strings.Contains(w.Body.String(), `href="#simulation"`) ||
+		!strings.Contains(w.Body.String(), `id="simulation-view"`) {
+		t.Fatal("dashboard has no embedded simulation view")
+	}
+	for _, path := range []string{"/simulation", "/simulation/", "/simulation/index.html"} {
+		if w := call(h, "GET", path, "", false); w.Code != http.StatusTemporaryRedirect || w.Header().Get("Location") != "/#simulation" {
+			t.Fatalf("redirect %s: %d, %q", path, w.Code, w.Header().Get("Location"))
+		}
+	}
+	for _, path := range []string{
+		"/simulation/simulation.js", "/simulation/data.js",
+		"/simulation/simulation.css", "/simulation/exchange.svg", "/simulation/application-1.png",
+	} {
+		if w := call(h, "GET", path, "", false); w.Code != http.StatusOK || w.Body.Len() == 0 {
+			t.Fatalf("asset %s: %d", path, w.Code)
+		}
+	}
+}

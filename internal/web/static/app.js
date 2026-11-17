@@ -2,7 +2,12 @@
 const $=id=>document.getElementById(id);
 const state={page:1,limit:8,sort:'latest',source:'',category:'',query:'',status:'',has_schedule:false,upcoming:false,include_expired:false};
 const INTEREST_STORAGE_KEY='ssu_cast_interests_v1';
-let currentView=location.hash==='#explore'?'explore':'home';
+const views={
+ '#home':{panel:'home-view',name:'home',title:'홈'},
+ '#forecast':{panel:'home-view',name:'home',title:'홈'},
+ '#explore':{panel:'explore-section',name:'explore',title:'공고 탐색'},
+ '#simulation':{panel:'simulation-view',name:'simulation',title:'교환활동 시뮬레이션'}
+};
 let sources=[],categories=[],pageData=null,listController=null,detailController=null,weatherNotices=[],weatherAsOf=null,selectedForecastDate=null,userInterests=loadSavedInterests();
 const reasons={image_evidence_not_independently_verified:'이미지 판독 내용 확인 필요',text_image_conflict:'본문과 이미지의 일정이 다름',image_model_review_required:'이미지 정보 검토 필요',low_image_confidence:'작거나 흐린 이미지 판독 확인 필요',missing_year:'연도 확인 필요',unsupported_datetime:'날짜·시각 근거 확인 필요',evidence_mismatch:'원문 근거 불일치',tentative_schedule:'변경될 수 있는 일정',conditional_deadline:'조건부 마감',source_conflict:'원문 내용 확인 필요',approximate_date:'대략적인 날짜',missing_date:'날짜 미상',missing_time:'시각 미기재',no_fixed_calendar:'확정 날짜 없음'};
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
@@ -13,7 +18,8 @@ async function api(path,options={}){const r=await fetch(path,{credentials:'same-
 function showLogin(){if($('detail').open)$('detail').close();$('login').classList.remove('hidden');$('app').classList.add('hidden');$('logout').classList.add('hidden');}
 function showApp(){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('logout').classList.remove('hidden');}
 function parameters(){const p=new URLSearchParams();if(state.query)p.set('search_in','title');for(const [k,v]of Object.entries(state)){if(v!==''&&v!==false)p.set(k,String(v));}return p;}
-function remember(){const p=parameters();p.delete('limit');history.replaceState(null,'','/?'+p+(currentView==='explore'?'#explore':'#home'));}
+function viewHash(){return Object.hasOwn(views,location.hash)?location.hash:'#home';}
+function remember(){const p=parameters();p.delete('limit');history.replaceState(null,'','/?'+p+viewHash());}
 function feedback(title,message,retry=false){const box=$('feedback');box.replaceChildren(el('strong','',title),el('p','',message));if(retry){const b=el('button','primary','다시 불러오기');b.type='button';b.onclick=typeof retry==='function'?retry:()=>load();box.append(b);}box.classList.remove('hidden');}
 function filters(){
  const nav=$('categories');nav.replaceChildren();for(const c of [{id:'',label:'전체'},...categories]){const b=el('button','category-button'+(state.category===c.id?' active':''));b.type='button';b.setAttribute('aria-pressed',String(state.category===c.id));b.append(el('span','',c.label));b.onclick=()=>{state.category=c.id;state.page=1;filters();load();};nav.append(b);}
@@ -221,12 +227,14 @@ $('reset').onclick=resetFilters;
 $('prev').onclick=()=>{if(state.page>1){state.page--;load();$('explore-results').scrollTop=0;}};$('next').onclick=()=>{if(pageData&&state.page<pageData.pages){state.page++;load();$('explore-results').scrollTop=0;}};
 $('close-detail').onclick=()=>$('detail').close();$('detail').addEventListener('close',()=>detailController?.abort());$('detail').addEventListener('click',e=>{if(e.target===$('detail')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
 function switchView(){
- const hash=location.hash;
- currentView=hash==='#explore'?'explore':'home';document.body.dataset.view=currentView;
- $('home-view').classList.toggle('hidden',currentView!=='home');$('explore-section').classList.toggle('hidden',currentView!=='explore');$('home-search').classList.toggle('hidden',currentView!=='home');
- for(const link of document.querySelectorAll('.rail-links a')){const active=link.hash===(hash==='#forecast'?'#forecast':currentView==='home'?'#home':'#explore');link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
+ const hash=viewHash();
+ const view=views[hash];
+ document.body.dataset.view=view.name;
+ for(const panel of $('app').querySelectorAll(':scope > section'))panel.classList.toggle('hidden',panel.id!==view.panel);
+ $('home-search').classList.toggle('hidden',view.name!=='home');
+ for(const link of document.querySelectorAll('.rail-links a')){const active=link.hash===hash;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
  if(hash==='#forecast')$('forecast-section').scrollIntoView({block:'start'});else window.scrollTo({top:0,left:0,behavior:'instant'});
- document.title=(currentView==='home'?'홈':'공고 탐색')+' · 숭실대학교 공고 모아보기';
+ document.title=view.title+' · 숭실대학교 공고 모아보기';
 }
 window.addEventListener('hashchange',switchView);
 $('home-search').onsubmit=e=>{e.preventDefault();state.query=$('home-query').value.trim();$('query').value=state.query;state.page=1;location.hash='explore';switchView();load();};

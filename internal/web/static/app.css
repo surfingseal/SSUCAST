@@ -15,6 +15,18 @@
   --amber:#efc66f;
   --amber-bg:#373125;
   --green:#b5d3bd;
+  --type-heading-size:1.75rem;
+  --type-heading-weight:650;
+  --type-heading-leading:1.3;
+  --type-heading-tracking:-.03em;
+  --type-card-title-size:1.1875rem;
+  --type-card-title-weight:600;
+  --type-card-title-leading:1.4;
+  --type-body-leading:1.5;
+  --type-control-weight:650;
+  --type-label-size:.875rem;
+  --type-caption-size:.8125rem;
+  --type-meta-size:.75rem;
   font-family:"Pretendard Variable",Pretendard,"Inter",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   font-size:16px;
   background:var(--bg);
@@ -66,10 +78,10 @@ p,h1,h2,h3 {
   margin:0
 }
 h2 {
-  font-size:28px;
-  line-height:1.3;
-  font-weight:650;
-  letter-spacing:-.03em
+  font-size:var(--type-heading-size);
+  line-height:var(--type-heading-leading);
+  font-weight:var(--type-heading-weight);
+  letter-spacing:var(--type-heading-tracking)
 }
 .hidden {
   display:none!important
@@ -414,6 +426,22 @@ h2 {
   height:100%;
   max-height:330px
 }
+.home-simulation-link {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:44px;
+  margin-bottom:16px;
+  padding:10px 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--panel);
+  font-weight:650
+}
+.home-simulation-link:hover {
+  background:var(--card)
+}
 .home-bottom {
   display:grid;
   grid-template-columns:.72fr 1fr;
@@ -599,7 +627,7 @@ h2 {
   font-size:15px;
   line-height:1.7
 }
-.explore-section {
+:is(.explore-section,.simulation) {
   width:100%;
   padding:20px 38px 24px;
   min-height:calc(100vh - 156px);
@@ -639,7 +667,7 @@ h2 {
   border:1px solid #ddd;
   border-radius:12px;
   padding:10px 24px;
-  font-weight:650
+  font-weight:var(--type-control-weight)
 }
 .search .primary {
   min-width:106px;
@@ -798,10 +826,10 @@ h2 {
   background:#3b3528
 }
 .card h2 {
-  font-size:19px;
-  line-height:1.4;
+  font-size:var(--type-card-title-size);
+  line-height:var(--type-card-title-leading);
   margin:12px 0 2px;
-  font-weight:600;
+  font-weight:var(--type-card-title-weight);
   min-width:0
 }
 .card-open {
@@ -1327,7 +1355,7 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
   .spotlight-item-date {
     font-size:13px
   }
-  .explore-section {
+  :is(.explore-section,.simulation) {
     padding-inline:24px
   }
   .card {
@@ -1474,7 +1502,7 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
   .weather-top-bar {
     gap:12px
   }
-  .explore-section {
+  :is(.explore-section,.simulation) {
     min-height:calc(100vh - 142px)
   }
 }
@@ -1702,7 +1730,7 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
   .weather-day-head h3 {
     font-size:14px
   }
-  .explore-section {
+  :is(.explore-section,.simulation) {
     padding:16px 12px;
     min-height:calc(100vh - 172px);
     border-radius:20px
@@ -2026,19 +2054,19 @@ html[data-theme="light"] .source-button.active,html[data-theme="light"] .categor
     min-height: 180px;
   }
 }
-body[data-view="explore"] {
+body:is([data-view="explore"],[data-view="simulation"]) {
   height: 100dvh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
-body[data-view="explore"] > .header { flex-shrink: 0; }
-body[data-view="explore"] > .shell {
+body:is([data-view="explore"],[data-view="simulation"]) > .header { flex-shrink: 0; }
+body:is([data-view="explore"],[data-view="simulation"]) > .shell {
   flex: 1;
   min-height: 0;
   padding-bottom: 28px;
 }
-body[data-view="explore"] .explore-section {
+body:is([data-view="explore"],[data-view="simulation"]) :is(.explore-section,.simulation) {
   height: 100%;
   min-height: 0;
   overflow: hidden;
@@ -2064,7 +2092,7 @@ body[data-view="explore"] .explore-section {
 }
 .explore-results:focus-visible { outline: 2px solid var(--muted); outline-offset: -2px; }
 @media (max-width: 650px) {
-  body[data-view="explore"] > .shell { padding-bottom: 16px; }
+  body:is([data-view="explore"],[data-view="simulation"]) > .shell { padding-bottom: 16px; }
   .explore-results { padding-bottom: 16px; }
 }
 
