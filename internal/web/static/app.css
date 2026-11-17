@@ -2165,3 +2165,16 @@ body[data-view="explore"] .explore-section {
     overflow-y: auto;
   }
 }
+
+/* Reserve the second slot so one notice has the same height as two notices. */
+@media (min-width: 961px) {
+  .home-bottom:has(.urgent-spotlight[data-count="1"]) { min-height: 330px; }
+  .urgent-spotlight.few-notices[data-count="1"] {
+    grid-template-rows: repeat(2, minmax(118px, 1fr));
+  }
+}
+@media (max-width: 650px) {
+  .urgent-spotlight.few-notices[data-count="1"] {
+    grid-template-rows: repeat(2, minmax(118px, 1fr));
+  }
+}
