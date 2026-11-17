@@ -17,6 +17,7 @@ var Seoul = time.FixedZone("Asia/Seoul", 9*3600)
 var CategoryLabels = map[string]string{"academic": "학사", "scholarship": "장학", "international": "국제교류", "international_student": "외국인 유학생", "extracurricular": "비교과·행사", "teaching": "교직", "volunteer": "봉사", "other": "기타", "unknown": "분류 확인 필요"}
 
 type Filter struct {
+	Categories                                      []string
 	IncludeExpired                                  bool
 	Query, Source, Category, Status, Sort, SearchIn string
 	HasSchedule, Upcoming                           *bool
@@ -25,7 +26,7 @@ type Filter struct {
 
 func Parse(q url.Values) (Filter, error) {
 	f := Filter{Page: 1, Limit: 12, Sort: "latest"}
-	allowed := map[string]bool{"query": true, "search_in": true, "source": true, "category": true, "status": true, "sort": true, "has_schedule": true, "upcoming": true, "include_expired": true, "page": true, "limit": true}
+	allowed := map[string]bool{"query": true, "search_in": true, "source": true, "category": true, "categories": true, "status": true, "sort": true, "has_schedule": true, "upcoming": true, "include_expired": true, "page": true, "limit": true}
 	for k, v := range q {
 		if !allowed[k] || len(v) != 1 {
 			return f, fmt.Errorf("알 수 없거나 중복된 검색 조건입니다")
@@ -74,6 +75,28 @@ func Parse(q url.Values) (Filter, error) {
 	f.Category = q.Get("category")
 	if f.Category != "" && CategoryLabels[f.Category] == "" {
 		return f, fmt.Errorf("카테고리가 올바르지 않습니다")
+	}
+	if selected := q.Get("categories"); selected != "" {
+		if f.Category != "" {
+			return f, fmt.Errorf("category와 categories는 함께 지정할 수 없습니다")
+		}
+		if len(selected) > 256 {
+			return f, fmt.Errorf("카테고리 조건이 너무 깁니다")
+		}
+		values := strings.Split(selected, ",")
+		if len(values) > len(CategoryLabels) {
+			return f, fmt.Errorf("카테고리 선택 수가 올바르지 않습니다")
+		}
+		seen := make(map[string]bool)
+		for _, value := range values {
+			if CategoryLabels[value] == "" {
+				return f, fmt.Errorf("카테고리가 올바르지 않습니다")
+			}
+			if !seen[value] {
+				f.Categories = append(f.Categories, value)
+				seen[value] = true
+			}
+		}
 	}
 	f.Status = q.Get("status")
 	if f.Status != "" && f.Status != "진행" && f.Status != "unknown" && f.Status != "완료" {

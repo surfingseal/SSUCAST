@@ -115,7 +115,7 @@ func (s *Server) Handler() http.Handler {
 			http.Error(w, "Method not allowed", 405)
 			return
 		}
-		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/weather.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" && r.URL.Path != "/dashboard.js" && !strings.HasPrefix(r.URL.Path, "/figma/") {
+		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/weather.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" && r.URL.Path != "/dashboard.js" && r.URL.Path != "/calendar.js" && r.URL.Path != "/seniors.js" && r.URL.Path != "/home-search.js" && !strings.HasPrefix(r.URL.Path, "/figma/") {
 			http.NotFound(w, r)
 			return
 		}
@@ -239,6 +239,10 @@ func (s *Server) api(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		send(w, 200, v)
+		return
+	}
+	if path == "/api/notice-predictions" {
+		s.predictionAPI(w, r)
 		return
 	}
 	if path == "/api/notices" {

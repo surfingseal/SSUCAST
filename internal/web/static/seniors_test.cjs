@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('node:assert/strict');
+const seniors=require('./seniors.js');
+assert.equal(seniors.personas.length,3);
+const first=seniors.events('jimin');assert.equal(first.length,16);
+assert.equal(first.find(e=>e.date==='2026-11-17').label,'자기소개서 준비');
+assert.equal(first.find(e=>e.date==='2026-11-17').sourceDate,'2025-11-17');
+assert.ok(first.every(e=>e.senior&&e.persona.data_origin==='synthetic'));
+assert.ok(seniors.events('jimin','scholarship').every(e=>e.category==='scholarship'));
+assert.equal(seniors.events('missing').length,0);
+assert.equal(seniors.events('jimin','invalid').length,0);
+assert.equal(seniors.displayDate('2024-02-29'),null);
+assert.equal(seniors.displayDate('2025-02-30'),null);
+assert.equal(seniors.displayDate('2025-11-17'),'2026-11-17');
+assert.equal(seniors.displayDate('2026-02-12'),'2027-02-12');
+assert.equal(new Set(first.map(e=>e.persona.id)).size,1);
+assert.ok(seniors.events('seoyeon').every(e=>e.persona.id==='seoyeon'));
+console.log('SENIOR PERSONA, CATEGORY AND ORIGINAL DATE TESTS PASSED');

@@ -77,3 +77,19 @@ func TestPartialAndUnanalyzed(t *testing.T) {
 		t.Fatal("safe URL blocked")
 	}
 }
+
+func TestMultipleCategoryFilters(t *testing.T) {
+	f, err := Parse(mustURL("categories=scholarship,international,scholarship"))
+	if err != nil || len(f.Categories) != 2 || f.Categories[0] != "scholarship" || f.Categories[1] != "international" || f.Category != "" {
+		t.Fatalf("multi categories: %#v %v", f, err)
+	}
+	legacy, err := Parse(mustURL("category=scholarship"))
+	if err != nil || legacy.Category != "scholarship" || len(legacy.Categories) != 0 {
+		t.Fatalf("legacy changed: %#v %v", legacy, err)
+	}
+	for _, query := range []string{"categories=scholarship,bogus", "categories=scholarship,", "categories=$ne", "categories=scholarship&categories=international", "category=scholarship&categories=international"} {
+		if _, err := Parse(mustURL(query)); err == nil {
+			t.Fatalf("accepted invalid category filter %s", query)
+		}
+	}
+}

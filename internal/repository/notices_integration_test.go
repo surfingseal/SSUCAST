@@ -55,6 +55,7 @@ func TestNoticesIsolatedMongo(t *testing.T) {
 		switch i {
 		case 0:
 			v.Title = "임박 신청"
+			v.Categories = []string{"scholarship", "international"}
 			v.Schedules = []model.Schedule{confirmed}
 		case 1:
 			v.Title = "나중 신청"
@@ -76,6 +77,8 @@ func TestNoticesIsolatedMongo(t *testing.T) {
 		case 3:
 			v.Status = "완료"
 		case 4:
+			v.Category = "international"
+			v.Categories = []string{"international"}
 			v.SourceID = mediaid
 			v.SourceName = "ssu_global_media"
 			v.Content = "한국어 검색대상"
@@ -86,6 +89,22 @@ func TestNoticesIsolatedMongo(t *testing.T) {
 		items = append(items, v)
 		if _, e = db.Collection("crawled_contents").InsertOne(ctx, v); e != nil {
 			t.Fatal(e)
+		}
+	}
+	// Match either selected category, including legacy category-array membership,
+	// without duplicating a notice that belongs to both selected categories.
+	for _, tc := range []struct {
+		categories []string
+		want       int64
+	}{
+		{[]string{"scholarship"}, 3},
+		{[]string{"international"}, 2},
+		{[]string{"scholarship", "international"}, 4},
+		{[]string{"volunteer"}, 0},
+	} {
+		page, err := store.Notices(ctx, notices.Filter{Page: 1, Limit: 12, Sort: "latest", Categories: tc.categories}, now)
+		if err != nil || int64(page.Total) != tc.want {
+			t.Fatalf("categories %v: total=%d want=%d err=%v", tc.categories, page.Total, tc.want, err)
 		}
 	}
 	f := notices.Filter{Page: 1, Limit: 2, Sort: "deadline"}

@@ -27,6 +27,9 @@ func (s *ContentRepository) noticeMatch(ctx context.Context, f notices.Filter) (
 		return nil, e
 	}
 	and := bson.A{base}
+	if len(f.Categories) > 0 {
+		and = append(and, bson.M{"$or": bson.A{bson.M{"category": bson.M{"$in": f.Categories}}, bson.M{"categories": bson.M{"$in": f.Categories}}}})
+	}
 	if f.Status != "" {
 		and = append(and, bson.M{"status": f.Status})
 	}

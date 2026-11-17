@@ -22,3 +22,37 @@ assert.deepEqual(ui.paginationPages(6,9),[6,7,8,9]);
 assert.deepEqual(ui.paginationPages(9,9),[6,7,8,9]);
 assert.deepEqual(ui.paginationPages(6,12),[6,7,8,9,10]);
 console.log('DASHBOARD CLOCK, DATE, TODAY FILTER AND ASSET TESTS PASSED');
+
+// The hero uses today's daily forecast, not the aggregate three-day urgency.
+const differingReport={todayDate:'2026-11-17',today:{level:'storm'},forecast:[
+ {date:'2026-11-18',level:'storm',dayCount:3,deadlines:[{noticeId:'future'}]},
+ {date:'2026-11-17',level:'clear',dayCount:0,deadlines:[]}
+]};
+assert.equal(ui.todayForecast(differingReport).level,'clear');
+assert.equal(ui.todayForecast(differingReport).dayCount,0);
+assert.deepEqual(ui.todayDeadlines(differingReport),[]);
+assert.equal(ui.todayForecast({todayDate:'2026-11-19',forecast:differingReport.forecast}),null);
+
+const briefingReport={todayDate:'2026-11-17',forecast:[
+ {date:'2026-11-17',dayCount:0,deadlines:[]},
+ {date:'2026-11-18',dayCount:3,deadlines:[{noticeId:'late',endDate:'2026-11-18',endTime:null,boundaryMs:300},{noticeId:'early',noticeTitle:'먼저 마감',endDate:'2026-11-18',endTime:'09:00',boundaryMs:100},{noticeId:'middle',endDate:'2026-11-18',endTime:'17:00',boundaryMs:200}]}
+]};
+const briefing=ui.briefing(briefingReport);
+assert.equal(briefing.todayCount,0);assert.equal(briefing.tomorrowCount,3);
+assert.equal(briefing.next.noticeId,'early');assert.equal(briefing.targetDate,'2026-11-18');
+assert.equal(ui.briefing({todayDate:'2026-11-30',forecast:[]}).tomorrowDate,'2026-12-01');
+assert.equal(ui.briefing({todayDate:'2026-11-30',forecast:[]}).next,null);
+assert.equal(ui.briefing({todayDate:'2026-11-30',forecast:[]}).targetDate,null);
+assert.equal(briefingReport.forecast[1].deadlines[0].noticeId,'late'); // Sorting must not mutate the shared report.
+
+const weekly=ui.weekOverview({todayDate:'2026-11-17',forecast:[
+ {date:'2026-11-16',dayCount:9,deadlines:[{noticeId:'past'}]},
+ {date:'2026-11-17',dayCount:1,deadlines:[{noticeId:'a'}]},
+ {date:'2026-11-18',dayCount:2,deadlines:[{noticeId:'a'},{noticeId:'b'}]},
+ {date:'2026-11-20',dayCount:2,deadlines:[{noticeId:'c'},{noticeId:'d'}]},
+ {date:'2026-11-24',dayCount:8,deadlines:[{noticeId:'outside'}]}
+]});
+assert.equal(weekly.total,4);assert.equal(weekly.endDate,'2026-11-23');
+assert.equal(weekly.peakCount,2);assert.equal(weekly.peakDays[0].date,'2026-11-18');assert.equal(weekly.peakDays.length,2);
+assert.equal(ui.weekOverview({todayDate:'2026-12-29',forecast:[]}).endDate,'2027-01-04');
+assert.deepEqual(ui.weekOverview({todayDate:'2026-11-17',forecast:[]}).peakDays,[]);

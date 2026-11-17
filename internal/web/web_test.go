@@ -155,7 +155,7 @@ func TestHTTPSProxyOriginAndHealth(t *testing.T) {
 func TestDashboardAssetsAndTitleSearch(t *testing.T) {
 	f := &fake{}
 	h := (&Server{Store: f, Token: testToken}).Handler()
-	for _, path := range []string{"/dashboard.js", "/figma/8e098.png", "/figma/982c3.svg"} {
+	for _, path := range []string{"/dashboard.js", "/calendar.js", "/seniors.js", "/home-search.js", "/figma/8e098.png", "/figma/982c3.svg"} {
 		w := call(h, "GET", path, "", false)
 		if w.Code != 200 || w.Body.Len() == 0 {
 			t.Fatalf("asset %s: %d", path, w.Code)
@@ -167,5 +167,17 @@ func TestDashboardAssetsAndTitleSearch(t *testing.T) {
 	w := call(h, "GET", "/api/notices?query=장학&search_in=title", "", true)
 	if w.Code != 200 || f.filter.SearchIn != "title" {
 		t.Fatalf("title search: %d", w.Code)
+	}
+}
+
+func TestMultipleCategoriesAPI(t *testing.T) {
+	f := &fake{}
+	h := (&Server{Store: f, Token: testToken}).Handler()
+	w := call(h, "GET", "/api/notices?categories=scholarship,international", "", true)
+	if w.Code != 200 || len(f.filter.Categories) != 2 {
+		t.Fatalf("multiple categories: %d %#v", w.Code, f.filter)
+	}
+	if w := call(h, "GET", "/api/notices?categories=scholarship,invalid", "", true); w.Code != 400 {
+		t.Fatalf("invalid categories: %d", w.Code)
 	}
 }
