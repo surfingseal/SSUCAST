@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id);
 const state={page:1,limit:8,sort:'latest',source:'',categories:[],query:'',status:'',include_expired:false};
 let homeSearchUI=null;
 const INTEREST_STORAGE_KEY='ssu_cast_interests_v1';
-let currentView=location.hash==='#calendar'?'calendar':location.hash==='#explore'?'explore':'home';
+let currentView=location.hash==='#simulation'?'simulation':location.hash==='#calendar'?'calendar':location.hash==='#explore'?'explore':'home';
 let sources=[],categories=[],pageData=null,listController=null,detailController=null,weatherNotices=[],weatherAsOf=null,selectedForecastDate=null,userInterests=loadSavedInterests();
 const reasons={image_evidence_not_independently_verified:'이미지 판독 내용 확인 필요',text_image_conflict:'본문과 이미지의 일정이 다름',image_model_review_required:'이미지 정보 검토 필요',low_image_confidence:'작거나 흐린 이미지 판독 확인 필요',missing_year:'연도 확인 필요',unsupported_datetime:'날짜·시각 근거 확인 필요',evidence_mismatch:'원문 근거 불일치',tentative_schedule:'변경될 수 있는 일정',conditional_deadline:'조건부 마감',source_conflict:'원문 내용 확인 필요',approximate_date:'대략적인 날짜',missing_date:'날짜 미상',missing_time:'시각 미기재',no_fixed_calendar:'확정 날짜 없음'};
 function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
@@ -14,7 +14,7 @@ async function api(path,options={}){const r=await fetch(path,{credentials:'same-
 function showLogin(){homeSearchUI?.close();if($('senior-detail').open)$('senior-detail').close();if($('detail').open)$('detail').close();if($('calendar-day-dialog').open)$('calendar-day-dialog').close();$('login').classList.remove('hidden');$('app').classList.add('hidden');$('logout').classList.add('hidden');}
 function showApp(){$('login').classList.add('hidden');$('app').classList.remove('hidden');$('logout').classList.remove('hidden');}
 function parameters(){const p=new URLSearchParams();if(state.query)p.set('search_in','title');for(const [k,v]of Object.entries(state)){if(k!=='categories'&&v!==''&&v!==false)p.set(k,String(v));}if(state.categories.length===1)p.set('category',state.categories[0]);else if(state.categories.length>1)p.set('categories',state.categories.join(','));return p;}
-function remember(){const p=parameters();p.delete('limit');history.replaceState(null,'','/?'+p+(currentView==='calendar'?'#calendar':currentView==='explore'?'#explore':'#home'));}
+function remember(){const p=parameters();p.delete('limit');history.replaceState(null,'','/?'+p+(currentView==='simulation'?'#simulation':currentView==='calendar'?'#calendar':currentView==='explore'?'#explore':'#home'));}
 function feedback(title,message,retry=false){const box=$('feedback');box.replaceChildren(el('strong','',title),el('p','',message));if(retry){const b=el('button','primary','다시 불러오기');b.type='button';b.onclick=typeof retry==='function'?retry:()=>load();box.append(b);}box.classList.remove('hidden');}
 function filters(){
  const nav=$('categories');const categoryScroll=nav.scrollLeft;nav.replaceChildren();for(const c of [{id:'',label:'전체'},...categories]){
@@ -247,11 +247,11 @@ $('prev').onclick=()=>{if(state.page>1){state.page--;load();$('explore-results')
 $('close-detail').onclick=()=>$('detail').close();$('detail').addEventListener('close',()=>detailController?.abort());$('detail').addEventListener('click',e=>{if(e.target===$('detail')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
 function switchView(){
  const hash=location.hash;
- currentView=hash==='#calendar'?'calendar':hash==='#explore'?'explore':'home';document.body.dataset.view=currentView;if(currentView!=='home')homeSearchUI?.close();
- $('home-view').classList.toggle('hidden',currentView!=='home');$('explore-section').classList.toggle('hidden',currentView!=='explore');$('calendar-section').classList.toggle('hidden',currentView!=='calendar');$('home-search').classList.toggle('hidden',currentView!=='home');
+ currentView=hash==='#simulation'?'simulation':hash==='#calendar'?'calendar':hash==='#explore'?'explore':'home';document.body.dataset.view=currentView;if(currentView!=='home')homeSearchUI?.close();
+ $('home-view').classList.toggle('hidden',currentView!=='home');$('explore-section').classList.toggle('hidden',currentView!=='explore');$('calendar-section').classList.toggle('hidden',currentView!=='calendar');$('simulation-view').classList.toggle('hidden',currentView!=='simulation');$('home-search').classList.toggle('hidden',currentView!=='home');
  for(const link of document.querySelectorAll('.rail-links a')){const active=link.hash==='#'+currentView;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
  if(hash==='#forecast')$('forecast-section').scrollIntoView({block:'start'});else window.scrollTo({top:0,left:0,behavior:'instant'});
- document.title=({home:'홈',explore:'공고 탐색',calendar:'캘린더'}[currentView])+' · 숭실대학교 공고 모아보기';
+ document.title=({home:'홈',explore:'공고 탐색',calendar:'캘린더',simulation:'교환활동 시뮬레이션'}[currentView])+' · 숭실대학교 공고 모아보기';
  if(currentView==='calendar'){renderCalendar();loadCalendar();loadCalendarPredictions();}
 }
 window.addEventListener('hashchange',switchView);

@@ -115,7 +115,12 @@ func (s *Server) Handler() http.Handler {
 			http.Error(w, "Method not allowed", 405)
 			return
 		}
-		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/weather.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" && r.URL.Path != "/dashboard.js" && r.URL.Path != "/calendar.js" && r.URL.Path != "/seniors.js" && r.URL.Path != "/home-search.js" && !strings.HasPrefix(r.URL.Path, "/figma/") {
+		if r.URL.Path == "/simulation" || r.URL.Path == "/simulation/" || r.URL.Path == "/simulation/index.html" {
+			w.Header().Set("Cache-Control", "no-cache")
+			http.Redirect(w, r, "/#simulation", http.StatusTemporaryRedirect)
+			return
+		}
+		if r.URL.Path != "/" && r.URL.Path != "/app.js" && r.URL.Path != "/weather.js" && r.URL.Path != "/app.css" && r.URL.Path != "/favicon.svg" && r.URL.Path != "/dashboard.js" && r.URL.Path != "/calendar.js" && r.URL.Path != "/seniors.js" && r.URL.Path != "/home-search.js" && !strings.HasPrefix(r.URL.Path, "/figma/") && !simulationAsset(r.URL.Path) {
 			http.NotFound(w, r)
 			return
 		}
@@ -293,4 +298,13 @@ func (s *Server) failure(w http.ResponseWriter, e error) {
 		return
 	}
 	send(w, 503, map[string]string{"error": "공고를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요"})
+}
+
+// Keep the new tab's public assets explicit; never expose test or arbitrary files.
+func simulationAsset(path string) bool {
+	switch path {
+	case "/simulation/simulation.js", "/simulation/data.js", "/simulation/simulation.css", "/simulation/exchange.svg", "/simulation/application-1.png":
+		return true
+	}
+	return false
 }

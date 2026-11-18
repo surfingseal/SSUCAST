@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="ko" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f0f0f"><title>숭실대학교 공고 모아보기</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/app.css"><script src="/weather.js" defer></script><script src="/dashboard.js" defer></script><script src="/calendar.js" defer></script><script src="/seniors.js" defer></script><script src="/home-search.js" defer></script><script src="/app.js" defer></script></head>
+<html lang="ko" data-theme="dark"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f0f0f"><title>숭실대학교 공고 모아보기</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/simulation/simulation.css"><script type="module" src="/simulation/simulation.js"></script><script src="/weather.js" defer></script><script src="/dashboard.js" defer></script><script src="/calendar.js" defer></script><script src="/seniors.js" defer></script><script src="/home-search.js" defer></script><script src="/app.js" defer></script></head>
 <body>
 <a class="skip-link" href="#explore">공고 탐색 바로가기</a>
 <nav class="rail" aria-label="주요 메뉴">
-<div class="rail-links"><a class="rail-link active" href="#home" aria-label="홈" title="홈"><img src="/figma/a1e7c.svg" alt=""></a><a class="rail-link" href="#explore" aria-label="공고 탐색" title="공고 탐색"><img src="/figma/7b602.svg" alt=""></a><a class="rail-link" href="#calendar" aria-label="캘린더" title="캘린더"><img src="/figma/982c3.svg" alt=""></a></div>
+<div class="rail-links"><a class="rail-link active" href="#home" aria-label="홈" title="홈"><img src="/figma/a1e7c.svg" alt=""></a><a class="rail-link" href="#explore" aria-label="공고 탐색" title="공고 탐색"><img src="/figma/7b602.svg" alt=""></a><a class="rail-link" href="#calendar" aria-label="캘린더" title="캘린더"><img src="/figma/982c3.svg" alt=""></a><a class="rail-link" href="#simulation" aria-label="교환활동 시뮬레이션" title="교환활동 시뮬레이션"><img src="/simulation/exchange.svg" alt=""></a></div>
 <div class="rail-footer"><details class="profile"><summary aria-label="프로필 메뉴"><img class="avatar" src="/figma/cfc22.png" alt="인성님 프로필"><img src="/figma/c9c63.svg" alt=""></summary><div class="profile-menu"><strong>인성님</strong><p>숭실대학교 공고 모아보기</p><button id="logout" class="quiet hidden" type="button">로그아웃</button></div></details><button id="open-policy-btn" class="rail-link rail-help" aria-label="산정 기준" title="산정 기준" type="button"><img src="/figma/25cce.svg" alt=""></button></div></nav>
 <header class="header"><div class="greeting"><p>안녕하세요, 인성님</p><p id="greeting-message">좋은 아침입니다.</p></div><div class="header-actions"><form id="home-search" class="home-search" role="search" autocomplete="off"><img src="/figma/485a1.svg" alt=""><label class="sr-only" for="home-query">공고명 검색</label><input id="home-query" name="query" type="search" maxlength="100" placeholder="공고 검색" role="combobox" aria-autocomplete="list" aria-controls="home-search-options" aria-expanded="false" aria-describedby="home-search-help" autocomplete="off" enterkeyhint="search"><button class="home-search-clear hidden" type="button" aria-label="검색어 지우기">×</button><div class="home-search-popup hidden"><div class="home-search-popup-heading"><span class="home-search-heading">최근 검색어</span><button class="home-search-history-clear hidden" type="button">기록 지우기</button></div><div id="home-search-options" role="listbox" aria-label="공고명 검색 제안"></div><p class="home-search-empty"></p><p class="home-search-shortcuts" aria-hidden="true">↑↓ 선택 · Enter 실행 · Esc 닫기</p></div><span id="home-search-help" class="sr-only">공고명을 입력하세요. 위아래 방향키로 후보를 선택하고 Enter로 실행하며 Escape로 닫습니다.</span><span class="sr-only" role="status" aria-live="polite"></span></form></div></header>
 <main id="login" class="login hidden"><h1>숭실대학교 공고 모아보기</h1><form id="login-form"><label for="token">서비스 접근 토큰</label><input type="password" id="token" autocomplete="current-password" required><button class="primary" type="submit">시작하기</button><p id="login-error" role="alert"></p></form></main>
@@ -32,7 +32,415 @@
 <div id="sources" class="source-tabs" role="group" aria-label="출처 선택"></div><nav id="categories" class="categories" aria-label="카테고리 선택"></nav><div class="toolbar"><p id="result-count" aria-live="polite">공고를 불러오는 중</p><div class="toolbar-controls"><button id="reset" type="button" class="quiet reset-filters"><span aria-hidden="true">⟳</span> 필터 초기화</button><label class="sr-only" for="sort">정렬</label><span class="sort-select"><select id="sort"><option value="latest">최신순</option><option value="deadline">마감 임박순</option><option value="event">행사 예정순</option></select><svg class="sort-chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 6.5L8 10L11.5 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div></div>
 <div id="explore-results" class="explore-results" role="region" aria-label="공고 검색 결과" tabindex="0"><div id="filter-note" class="filter-note hidden"></div><div id="feedback" class="feedback hidden" role="status"></div><div id="cards" class="cards" aria-live="polite"></div></div>
 <footer class="explore-footer"><p><img src="/figma/25cce.svg" alt="">지원 전 학교 원문과 첨부파일을 확인해 주세요.</p><nav class="pagination" aria-label="페이지 이동"><button id="prev" class="page-button" type="button">이전</button><span id="page-numbers"></span><span id="page-label" class="sr-only">1 / 1</span><button id="next" class="page-button" type="button">다음</button></nav></footer>
-</section><span id="visible-count" class="hidden"></span><span id="updated" class="hidden"></span>
+</section><section id="simulation-view" class="simulation panel hidden" aria-labelledby="simulation-title">
+  <header class="sim-header">
+    <h1 id="simulation-title">교환활동 시뮬레이션</h1>
+    <span class="sim-chip" id="stage-label" hidden></span>
+  </header>
+  <div class="sim-main" id="simulation-content">
+    <section id="activity">
+      <div class="sim-heading">
+        <h2 tabindex="-1">처음 도전하는 활동 찾기</h2>
+        <p>※ 모의 체험입니다. 실제 지원은 공식 공고에서 진행하세요.</p>
+      </div>
+      <div class="sim-columns">
+        <div class="sim-flow">
+          <fieldset class="sim-activity-options">
+            <legend>어떤 활동부터 알아볼까요?</legend>
+            <label class="sim-activity-card"><input type="radio" name="activity" disabled><span><strong>대회</strong><small>정해진 문제를 팀 또는 개인으로 해결하는 활동이에요.</small></span></label>
+            <label class="sim-activity-card"><input type="radio" name="activity" disabled><span><strong>공모전</strong><small>주제에 맞는 아이디어나 결과물을 준비하는 활동이에요.</small></span></label>
+            <label class="sim-activity-card"><input type="radio" name="activity" disabled><span><strong>대외활동</strong><small>교외 기관에서 사람들과 다양한 경험을 하는 활동이에요.</small></span></label>
+            <label class="sim-activity-card sim-activity-enabled"><input type="radio" name="activity" id="select-exchange"><span><strong>교환활동</strong><small>다른 지역 또는 해외에서 공부하고 교류하는 활동이에요.</small></span></label>
+            <label class="sim-activity-card sim-activity-wide"><input type="radio" name="activity" disabled><span><strong>아직 모르겠어요</strong><small>원하는 경험을 먼저 고르면 활동을 소개해 드릴게요.</small></span></label>
+          </fieldset>
+          <div class="sim-actions"><button class="sim-next" id="activity-next" type="button" disabled>다음</button></div>
+        </div>
+        <aside class="sim-aside">
+          <span class="sim-chip">활동 선택</span>
+          <h2>1 / 1 단계</h2>
+          <div class="sim-note">
+            <h3>가이드</h3>
+            <p>활동을 몰라도 괜찮아요. 어떤 경험인지 알아보고 준비를 체험해요.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="notice" hidden>
+      <div role="region" aria-labelledby="notice-title">
+        <article class="sim-notice-paper" aria-label="공식 모집 공고 본문">
+          <header class="sim-heading">
+            <h2 id="notice-title" tabindex="-1">2027-1학기 파견 교환ㆍ방문학생 프로그램 참가자 모집 안내 (2차)</h2>
+            <div class="sim-notice-meta">
+              <p>국제교류 · 2026. 08. 03.</p>
+              <a href="https://scatch.ssu.ac.kr/공지사항/?slug=2027-1학기-파견-교환ㆍ방문학생-프로그램-참가자-모집-2" target="_blank" rel="noopener noreferrer">SSU:catch 원문 ↗</a>
+            </div>
+          </header>
+<p>2027학년도 1학기 해외 파견 교환ㆍ방문학생 프로그램 참가자를 다음과 같이 모집하니 관심있는 학생들의 많은 지원 바랍니다.</p>
+<table>
+<tbody>
+<tr>
+<td><p>※ 파견 교환ㆍ방문학생 프로그램 참가자 모집은 <u>2차까지만</u> 진행됩니다.</p>
+<p><strong>※ 본 게시물은 향후 학교 별 사정에 따라 변경될 수 있으니 참고 바랍니다.</strong></p></td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<ol>
+<li><strong>교환</strong><strong>ㆍ방문학생 프로그램 개요 </strong>(관련링크: <a target="_blank" rel="noopener noreferrer" href="https://bit.ly/2MjAZBL">https://bit.ly/2MjAZBL</a>)</li>
+</ol>
+<p>가. 교환ㆍ방문학생 프로그램: 본교생 중 일정 자격을 갖춘 학부생이 본교 자매대학 또는 기관을 통해 최소 한 학기에서 최대 두 학기까지 수학할 수 있는 프로그램</p>
+<p>나. 파견기간: 최대 2학기</p>
+<p>다. 파견가능대학: 52개국 258개 대학 [붙임1] 참조</p>
+<p>라. 프로그램 진행절차: 링크 참조 (<a target="_blank" rel="noopener noreferrer" href="https://bit.ly/3cazQat">https://bit.ly/3cazQat</a>)</p>
+<p>다. 참고사항</p>
+<p>1) 교환학생 학점인정절차: (<a target="_blank" rel="noopener noreferrer" href="https://study.ssu.ac.kr/program/student4.do">https://study.ssu.ac.kr/program/student4.do</a>)</p>
+<p>2) 자매대학 소개: (<a target="_blank" rel="noopener noreferrer" href="https://study.ssu.ac.kr/community/uni_list.do">https://study.ssu.ac.kr/community/uni_list.do</a>)</p>
+<p>3) 해외교육체험기(파견 다녀온 학생 보고서 확인 가능): (<a target="_blank" rel="noopener noreferrer" href="https://study.ssu.ac.kr/community/exp_list.do">https://study.ssu.ac.kr/community/exp_list.do</a>)</p>
+<p>4) FAQ: (<a target="_blank" rel="noopener noreferrer" href="https://study.ssu.ac.kr/program/student5.do">https://study.ssu.ac.kr/program/student5.do</a>)</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<ol start="2">
+<li><strong>지원절차</strong></li>
+</ol>
+<p>가. 지원자격</p>
+<table>
+<tbody>
+<tr>
+<td>구분</td>
+<td colspan="2">내용</td>
+<td>비고</td>
+</tr>
+<tr>
+<td>수학학기</td>
+<td colspan="2"><p>ㆍ본교에서 한 학기 이상 수료한 학부 재학생</p>
+<p><strong>ㆍ마지막학기 파견 불가</strong></p>
+<p><strong> </strong></p></td>
+<td>ㆍ휴학생도 지원 가능하나, 파견학기인 2027-1학기에 필히 복학해야 함</td>
+</tr>
+<tr>
+<td>평점평균</td>
+<td>교환·방문학생</td>
+<td>ㆍ최소 2.5/4.5 이상</td>
+<td><p>ㆍ 증명용 성적증명서 기준</p>
+<p>ㆍ 각 프로그램 및 대학 별로 상이하므로 붙임 1 참고</p></td>
+</tr>
+<tr>
+<td><p>외국어성적</p>
+<p>(면접일에 원본 지참 필수(TOEIC 제외))</p></td>
+<td>교환·방문학생</td>
+<td>ㆍ대학별로 상이하므로 [붙임1] 확인</td>
+<td><p>ㆍ본교 공인외국어성적 등급표: <a target="_blank" rel="noopener noreferrer" href="https://bit.ly/3qRAVbj">https://bit.ly/3qRAVbj</a></p>
+<p>ㆍ각 프로그램 및 대학 별로 상이하므로 첨부파일 참고</p>
+<p><strong><u>ㆍ지원서 제출 시점 기준 유효기간 2년 이내여야 함</u></strong></p></td>
+</tr>
+<tr>
+<td>기타사항</td>
+<td colspan="2"><p>ㆍ본교와 파견 예정 대학이 지정하는 자격요건(평점평균 및 외국어 성적 등)을 갖춘 학생</p>
+<p>ㆍ해외여행에 결격사유가 없는 학생</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p>나. 지원 및 선발 절차</p>
+<table>
+<tbody>
+<tr>
+<td colspan="2">구분</td>
+<td>일시</td>
+<td>방법</td>
+<td>비고</td>
+</tr>
+<tr>
+<td rowspan="2">1차<br />
+서류<br />
+전형</td>
+<td>온라인 접수</td>
+<td rowspan="2">
+<p><strong>8.6.(</strong><strong>목) 10:00</strong></p>
+<p><strong>~</strong></p>
+<p><strong>8.13.(</strong><strong>목)</strong></p>
+<p><strong>23:59</strong></p>
+</td>
+<td>ㆍ접수 링크: <strong><a target="_blank" rel="noopener noreferrer" href="https://forms.gle/a826UWaTmY3ceLVn8">클릭하여이동</a></strong></td>
+<td>ㆍ<strong>접수일 이전 지원 시 자동 삭제됨</strong></td>
+</tr>
+<tr>
+<td>서류 접수</td>
+<td><p>ㆍ이메일 (<a target="_blank" rel="noopener noreferrer" href="mailto:study@ssu.ac.kr">study@ssu.ac.kr</a>) 접수</p>
+<p>※ <strong><u>메일 제목: [2027-1학기 교환방문 지원] 이름_학번 서류제출</u></strong></p>
+<p>ㆍ제출기한: <strong>2026.8.13.(목</strong><strong>) 23:59</strong></p>
+<p>※ 제출 시간 엄수하시기 바랍니다.</p>
+<p>&nbsp;</p></td>
+<td><p>※ 제출서류목록</p>
+<p><strong>(</strong><strong>반드시 순서대로 스캔해서 한 개의 pdf파일로 제출)</strong></p>
+<p>1. 교환학생 프로그램 지원서</p>
+<p>2. 공인외국어성적증명 사본1부</p>
+<p>3. 파견서약서 및 개인정보동의서</p></td>
+</tr>
+<tr>
+<td rowspan="2">2차<br />
+면접<br />
+전형</td>
+<td>
+<p>면접 대상자 발표</p>
+</td>
+<td><p>8.19.(수)</p>
+<p>(예정)</p></td>
+<td colspan="2">합격자 개별 연락</td>
+</tr>
+<tr>
+<td>
+<p>면접</p>
+</td>
+<td>8.21.(금)</td>
+<td colspan="2">확정 일자, 시간 및 장소: 추후 개별 공지</td>
+</tr>
+<tr>
+<td colspan="2">본교 예비합격자 발표</td>
+<td colspan="3">
+<p>8.25.(화) 예정</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<ol start="4">
+<li><strong>유의사항</strong></li>
+</ol>
+<p>가. 지원 관련 유의점</p>
+<p>1) 본인이 구사하는 외국어를 모국어로 하지 않는 국가의 학교 지원 시, 수강 가능 과목을 사전에 확인 후 지원</p>
+<p>2) 파견 희망하는 대학에 본인의 전공이 지원 가능한지 조사 후 지원해야 하며, 특히 예술창작학부 학생의 경우 전공 수업 수강이 제한적일 수 있음</p>
+<p>※ 상대교 홈페이지 및 본교 홈페이지의 자매대학 소개, 해외교육체험기 등을 참고할 것</p>
+<p>3) 유효기간이 명시되지 않은 어학 성적도 2년 이내의 성적만 제출 가능</p>
+<p>4) 최소 지원 자격을 갖추었더라도 서류 및 면접 결과가 적절한 수준에 미치지 못할 경우 선발하지 않음</p>
+<p>5) 제출한 서류의 위조, 대필, 대리 작성이 확인되는 경우 지원자격 박탈 또는 합격취소 처리됨</p>
+<p>6) 파견 가능 학과 및 파견 여부는 상대교 사정에 따라 사전 고지 없이 변경 될 수 있음</p>
+<p>나. 선발 관련 유의점</p>
+<p>1) 전형 결과에 따라 지원서 작성 시 <strong><u>선택한 대학이 아닌 대학으로 배정될 수 있음</u></strong><br />
+2) 본교 예비합격자로 선정된 후에도 <strong>상대교 사정에 따라 파견이 불허되거나 다른 대학으로<br />
+재배정될 수 있음</strong><br />
+3) 유럽권 학교의 경우 본교에서 2학기~4학기를 수학하지 않은 학생은 본교 예비합격<br />
+후에도 상대교 기준에 따라 입학 허가에 제한이 있을 수 있음</p>
+<p>4) 국제교류 장학금(방문, SHP, 지역전문가양성) 수혜 대상자는 1차 지원자에 한함.</p>
+<p>다. 서류 관련 유의점</p>
+<p>1) [붙임2] 지원서 파일의 경우, 좌측 상단의 보기-문서 편집 버튼을 눌러야 작성이 가능하며, 회색 부분에 입력할 수 있음. 회색 부분은 글씨 크기 등의 수정이 불가능하게 되어 있으며, 자기소개서 및 학업계획서는 자유로운 양식으로 제출하여도 됨.</p>
+<p>2) 어학 성적 기준 관련하여, 국제팀 홈페이지-커뮤니티-자매대학소개에 있는 자료 중 [국제팀] 대륙 국가 학교명 (년도) pdf 파일의 경우 과거의 게시물로, 최신 어학 성적 기준은 [붙임1]파일을 참고</p>
+<p>3) 어떠한 지원 방식이든(일반교환/방문/SHP/지역전문가/방문장학) 서류는 단 1개의 pdf파일로 ‘병합해서’ 제출(지원서 -어학성적 별개로 제출하는 게 아님 파일 별로 전송 x , pdf editor 사용 권장)</p>
+<p>4) (중요) 서류 제출 기한에 서류를 검토 후 누락된 것이 있을 경우 여러분들께 전화/메일/문자메시지 등의 수단으로 연락 예정 02-820-0757 전화번호는 국제팀 번호이니, 꼭 수신바람, 더불어 study@ssu.ac.kr 메일이 스팸함에 있을 수 있으니 스팸함 또한 확인 필요</p>
+<ol start="5">
+<li><strong>문의처</strong>: 국제팀 (신양관 203호, 02-820-0757, <a target="_blank" rel="noopener noreferrer" href="mailto:study@ssu.ac.kr">study@ssu.ac.kr</a>)</li>
+</ol>
+<p><strong>※ </strong><strong>모집정원, 면접형식, 과거합격자 성적 등에 관한 문의는 답변해 드릴 수 없음을 양해해 주시기 바랍니다.</strong></p>
+<p><strong> </strong></p>
+<p>붙임<br />
+1. 2027-1 파견가능대학 및 지원자격 (2차) 1부.<br />
+2. 교환학생 프로그램 지원서 1부.<br />
+3. 해외파견 서약서 및 개인정보제공활용 동의서 1부.<br />
+4. 지원 서류 샘플 모음 1부. 끝.</p>
+<p><strong>                                                                 </strong></p>
+<p>2026. 08. 03.</p>
+<p>국제처장</p>
+        </article>
+        <div class="sim-actions">
+          <button class="sim-back" data-back="activity" type="button">뒤로</button>
+          <button class="sim-next" id="notice-next" type="button">다음</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="conditions" hidden>
+      <div class="sim-heading">
+        <h2 tabindex="-1">지원 조건과 어학 기준 확인</h2>
+        <p>공고의 기준을 읽고 확인한 항목에 체크하세요.</p>
+      </div>
+      <div id="condition-groups" class="sim-condition-groups"></div>
+      <div class="sim-actions">
+        <button class="sim-back" data-back="notice" type="button">뒤로</button>
+        <button class="sim-next" id="conditions-next" type="button" disabled>다음</button>
+      </div>
+    </section>
+
+    <section id="application" hidden>
+      <div class="sim-heading">
+        <h2 tabindex="-1">교환학생 프로그램 모의지원</h2>
+      </div>
+      <div class="sim-columns">
+        <div id="paper-scroll" class="sim-paper-scroll" tabindex="0" role="region" aria-label="모의지원서 4쪽">
+          <section class="sim-paper" aria-label="지원서 1쪽">
+            <h3 class="sim-paper-title">2024-2학기 일반/방문 교환학생 프로그램 지원서</h3>
+            <h4 class="sim-paper-section-title">Ⅰ. 지원대학명 <small>모든 항목은 [붙임 1] 파견가능대학 및 지원자격 파일을 참조하여 작성</small></h4>
+            <div class="sim-paper-schools">
+              <table class="sim-form-table" aria-label="지원대학 지망과 수강 희망 학과">
+                <colgroup><col class="sim-rank-column"><col class="sim-program-column"><col></colgroup>
+                <tbody>
+                  <tr><th scope="rowgroup" rowspan="2">1지망</th><td data-field="-2"></td><td class="sim-school-cell"><button type="button" class="sim-school-field" aria-haspopup="dialog" aria-controls="school-dialog"><span data-field="-1"></span></button></td></tr>
+                  <tr><td data-field="-3"></td><td data-field="3"></td></tr>
+                </tbody>
+                <tbody>
+                  <tr><th scope="rowgroup" rowspan="2">2지망</th><td data-field="4"></td><td data-field="5"></td></tr>
+                  <tr><td data-field="6"></td><td data-field="7"></td></tr>
+                </tbody>
+                <tbody>
+                  <tr><th scope="rowgroup" rowspan="2">3지망</th><td data-field="8"></td><td data-field="9"></td></tr>
+                  <tr><td data-field="10"></td><td data-field="11"></td></tr>
+                </tbody>
+                <tbody class="sim-form-example">
+                  <tr><th scope="rowgroup" rowspan="2">예시</th><td>일반교환</td><td>(미국) California Baptist University</td></tr>
+                  <tr><td>E0009</td><td>College of Arts and Sciences</td></tr>
+                </tbody>
+              </table>
+              <div class="sim-paper-mascot" role="img" aria-label="지원서 예시 사진"></div>
+            </div>
+            <h4 class="sim-paper-section-title">Ⅱ. 인적/학적/지원자격사항</h4>
+            <table class="sim-form-table sim-form-details" aria-label="인적, 학적 및 지원 자격 사항">
+              <colgroup>
+                <col class="sim-col-group"><col class="sim-col-label"><col class="sim-col-score"><col class="sim-col-gap">
+                <col class="sim-col-middle"><col class="sim-col-city"><col class="sim-col-date"><col class="sim-col-divider"><col>
+              </colgroup>
+              <tbody data-form-group="identity">
+                <tr>
+                  <th scope="rowgroup" rowspan="7"><button type="button" class="sim-form-area">1. 인적사항</button></th>
+                  <th scope="row">이름(한글)</th><td colspan="2" data-field="12"></td><th scope="row" colspan="2">이름(영문)</th><td colspan="3" data-field="13"></td>
+                </tr>
+                <tr><th scope="row">이름(중국어/일본어)<small>중국·일본권 지원자만</small></th><td colspan="7" data-field="14"></td></tr>
+                <tr><th scope="row">성별</th><td colspan="2" data-field="15"></td><th scope="row" colspan="2">생년월일</th><td colspan="3" data-field="16"></td></tr>
+                <tr><th scope="row">핸드폰번호<small>010-0000-0000 형식</small></th><td colspan="2" data-field="17"></td><th scope="row" colspan="2">자택번호</th><td colspan="3" data-field="18"></td></tr>
+                <tr><th scope="row">국적 (Nationality)</th><td colspan="2" data-field="19"></td><th scope="row" colspan="2">출생지 (City of Birth)</th><td colspan="3" data-field="20"></td></tr>
+                <tr><th scope="row">주소</th><td colspan="7" data-field="21"></td></tr>
+                <tr><th scope="row">이메일주소</th><td colspan="7" data-field="22"></td></tr>
+              </tbody>
+              <tbody data-form-group="academics">
+                <tr>
+                  <th scope="rowgroup" rowspan="4"><button type="button" class="sim-form-area">2. 학적사항</button></th>
+                  <th scope="row">학번</th><td colspan="2" data-field="23"></td><th scope="row" colspan="2">학과(부)</th><td colspan="3" data-field="24"></td>
+                </tr>
+                <tr><th scope="row">현재학기</th><td colspan="2" data-field="25"></td><td colspan="2" data-field="26"></td><th scope="row" colspan="2">파견학기</th><td data-field="27"></td></tr>
+                <tr><th scope="row">복수 및 부전공</th><td colspan="2" data-field="28"></td><th scope="row" colspan="2">복수 및 부전공명</th><td colspan="3" data-field="29"></td></tr>
+                <tr><th scope="row">특성화장학생 여부</th><td colspan="7" data-field="30"></td></tr>
+              </tbody>
+              <tbody data-form-group="qualifications">
+                <tr>
+                  <th scope="rowgroup" rowspan="5"><button type="button" class="sim-form-area">3. 지원자격사항</button></th>
+                  <th scope="row">평점평균</th><td colspan="7" data-field="31"></td>
+                </tr>
+                <tr><th scope="rowgroup" rowspan="2">TOEFL IBT/IELTS 성적 및 세부점수</th><td data-field="32"></td><td colspan="2" data-field="33"></td><th scope="row" colspan="2">어학성적 만료일</th><td colspan="2" data-field="34"></td></tr>
+                <tr><td data-field="35"></td><td colspan="2" data-field="36"></td><td colspan="2" data-field="37"></td><td colspan="2" data-field="38"></td></tr>
+                <tr><th scope="rowgroup" rowspan="2">기타 외국어 성적</th><td data-field="39"></td><td colspan="2" data-field="40"></td><th scope="row" colspan="2">어학성적 만료일</th><td colspan="2" data-field="41"></td></tr>
+                <tr><td data-field="42"></td><td colspan="2" data-field="43"></td><th scope="row" colspan="2">어학성적 만료일</th><td colspan="2" data-field="44"></td></tr>
+              </tbody>
+            </table>
+            <h4 class="sim-paper-section-title">Ⅲ. 기타</h4>
+            <p class="sim-paper-note">* 상대교 수강 희망 학과는 [붙임 1] 파견가능대학 및 지원자격 파일의 수학가능학과·영어강의목록 등을 참조해 작성하세요. 공란인 경우 상대교 홈페이지에서 수학가능학과 및 영어강의 개설 현황을 확인해 기재하세요.</p>
+          </section>
+          <section class="sim-paper sim-paper-bordered" aria-label="지원서 2쪽">
+            <section data-form-group="signature">
+              <table class="sim-form-table sim-signature-table" aria-label="국제팀 프로그램 참가 여부">
+                <tbody>
+                  <tr><th scope="rowgroup" rowspan="2"><button type="button" class="sim-form-area">국제팀 프로그램 참가 여부</button><small>(필수항목 아님)</small></th><td>1. <span data-field="45"></span></td></tr>
+                  <tr><td>2. <span data-field="46"></span></td></tr>
+                </tbody>
+              </table>
+              <div class="sim-paper-declaration">
+                <p>본인은 <strong>2024-2학기 교환학생 프로그램</strong>에 지원합니다.</p>
+                <p class="sim-signature-value" data-field="47"></p>
+                <p class="sim-signature-value"><strong>신청인</strong> <span data-field="48"></span></p>
+                <h3>숭실대학교 총장 귀하</h3>
+              </div>
+            </section>
+            <p class="sim-paper-number" aria-hidden="true">2</p>
+          </section>
+          <section class="sim-paper sim-paper-bordered" aria-label="지원서 3쪽">
+            <h3 class="sim-paper-subtitle">자기소개서 및 학업계획서</h3>
+            <p class="sim-paper-note">자기소개서와 학업계획서는 자유 형식입니다. 국문과 제출 예정인 공인어학성적의 언어로 각각 1부씩 작성해 주세요.</p>
+            <section data-form-group="korean">
+              <h4 class="sim-paper-section-title">국문</h4>
+              <button type="button" class="sim-form-area sim-essay" data-field="49" data-placeholder="국문 자기소개서 및 학업계획서 예시 입력"></button>
+            </section>
+            <p class="sim-paper-number" aria-hidden="true">3</p>
+          </section>
+          <section class="sim-paper sim-paper-bordered" aria-label="지원서 4쪽">
+            <section data-form-group="foreign">
+              <h3 class="sim-paper-subtitle">공인어학성적 언어</h3>
+              <button type="button" class="sim-form-area sim-essay" data-field="50" data-placeholder="외국어 자기소개서 및 학업계획서 예시 입력"></button>
+            </section>
+            <p class="sim-paper-number" aria-hidden="true">4</p>
+          </section>
+        </div>
+        <aside class="sim-aside sim-application-aside">
+          <span class="sim-chip" id="selected-school">대학 미선택</span>
+          <p>표의 입력 구역을 한 번 클릭하면 해당 구역에 예시가 채워집니다. 지원서는 제공된 2024-2학기 샘플 양식입니다.</p>
+          <ul id="application-groups" class="sim-group-list"></ul>
+          <button class="sim-back sim-school-shortcut" id="school-shortcut" type="button" aria-haspopup="dialog" aria-controls="school-dialog">지원대학 선택</button>
+          <p id="application-progress" role="status">대학을 선택하고 모든 구역을 작성하세요.</p>
+          <div class="sim-actions">
+            <button class="sim-back" data-back="conditions" type="button">뒤로</button>
+            <button class="sim-next" id="application-next" type="button" disabled>다음</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="interview" hidden>
+      <div class="sim-heading">
+        <h2 tabindex="-1">교환학생 모의면접</h2>
+        <p>지원 동기와 현지에서의 계획을 어떻게 답할지 연습해 보세요.</p>
+      </div>
+      <div class="sim-columns">
+        <div class="sim-flow">
+          <fieldset class="sim-interview-options" aria-describedby="interview-feedback">
+            <legend id="interview-question" tabindex="-1"></legend>
+            <div id="answer-options"></div>
+          </fieldset>
+          <div class="sim-actions">
+            <button class="sim-back" id="interview-back" type="button">뒤로</button>
+            <button class="sim-next" id="interview-next" type="button" disabled>다음</button>
+          </div>
+        </div>
+        <aside class="sim-aside">
+          <span class="sim-chip">모의면접</span>
+          <h2 id="interview-progress"></h2>
+          <div class="sim-progress-bars" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p>정답을 선택하면 다음 단계로 넘어갈 수 있어요.</p>
+          <div id="interview-feedback" class="sim-note" aria-live="polite" aria-atomic="true">
+            <strong id="correct-letter" hidden></strong>
+            <p id="answer-message" hidden></p>
+            <div id="answer-guide" hidden>
+              <h3>가이드</h3>
+              <p id="guide-text"></p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="finished" hidden>
+      <div class="sim-heading">
+        <h2 tabindex="-1">시뮬레이션 종료</h2>
+        <p>2027-1학기 교환활동 모의지원과 모의면접을 마쳤습니다.</p>
+      </div>
+      <div class="sim-aside sim-completed">
+        <span class="sim-chip">모의면접 완료</span>
+        <h2>교환활동 시뮬레이션 완료</h2>
+        <p>공고 읽기, 지원 조건 확인, 대학 선택, 지원서 작성과 면접 3문항을 모두 완료했어요.</p>
+        <div class="sim-actions"><button id="restart" class="sim-next" type="button">처음으로</button></div>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="school-dialog" aria-labelledby="school-title" aria-describedby="school-description">
+    <div class="sim-dialog-heading">
+      <div>
+        <h2 id="school-title">지원대학 선택</h2>
+        <p id="school-description">1지망을 선택하면 2·3지망도 자동으로 채워져요.</p>
+      </div>
+      <form method="dialog"><button class="sim-back" type="submit" autofocus>닫기</button></form>
+    </div>
+    <div id="school-list" class="sim-school-list"></div>
+  </dialog>
+</section>
+<span id="visible-count" class="hidden"></span><span id="updated" class="hidden"></span>
 </main>
 <dialog id="senior-detail" class="senior-detail" aria-labelledby="senior-detail-title"><div class="detail-top"><h2 id="senior-detail-title">준비 기록</h2><button id="close-senior-detail" class="close" type="button" aria-label="준비 기록 닫기">×</button></div><div id="senior-detail-content"></div></dialog>
 <dialog id="calendar-day-dialog" aria-labelledby="calendar-day-title"><div class="detail-top"><h2 id="calendar-day-title"></h2><button id="calendar-day-close" class="close" type="button" aria-label="날짜별 공고 닫기">×</button></div><div id="calendar-day-events"></div></dialog>
