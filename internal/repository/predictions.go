@@ -11,6 +11,9 @@ import (
 
 // Read-only, separate collection. Real notice queries/counts never read these rows.
 func (s *ContentRepository) NoticePredictions(ctx context.Context, from, to string) ([]predictions.Prediction, error) {
+	if rows, active, err := s.historicalForecasts(ctx, from, to); active || err != nil {
+		return rows, err
+	}
 	cur, e := s.contents.Database().Collection("notice_predictions").Find(ctx, bson.M{"data_origin": "synthetic", "event_type": "deadline", "date": bson.M{"$gte": from, "$lte": to}}, options.Find().SetSort(bson.D{{Key: "date", Value: 1}, {Key: "_id", Value: 1}}))
 	if e != nil {
 		return nil, e

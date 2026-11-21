@@ -25,3 +25,8 @@ assert.equal(ui.predictionEvents([generated])[0].synthetic,true);
 assert.equal(ui.predictionEvents([{...generated,data_origin:'real'}]).length,0);
 assert.equal(ui.predictionEvents([{...generated,date:'2027-02-18'}]).length,0);
 assert.equal(ui.deadlineEvents([{id:'real',title:'실제 공고',schedules:[]}]).length,0);
+const forecast={...generated,data_origin:'historical_forecast',date_origin:'anniversary_estimate',expected_from:'2026-11-24',expected_to:'2026-12-08',evidence:{id:'history-1',url:'https://scatch.ssu.ac.kr/공지사항/?slug=old'}};
+assert.equal(ui.predictionEvents([forecast])[0].forecast,true);
+assert.equal(ui.predictionEvents([{...forecast,evidence:{id:'x',url:'https://evil.invalid/'}}]).length,0);
+assert.equal(ui.predictionEvents([{...forecast,expected_to:'2026-11-30'}]).length,0);
+assert.equal(ui.predictionEvents([{...forecast,evidence:null}]).length,0);

@@ -251,7 +251,7 @@ function switchView(){
  $('home-view').classList.toggle('hidden',currentView!=='home');$('explore-section').classList.toggle('hidden',currentView!=='explore');$('calendar-section').classList.toggle('hidden',currentView!=='calendar');$('simulation-view').classList.toggle('hidden',currentView!=='simulation');$('home-search').classList.toggle('hidden',currentView!=='home');
  for(const link of document.querySelectorAll('.rail-links a')){const active=link.hash==='#'+currentView;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
  if(hash==='#forecast')$('forecast-section').scrollIntoView({block:'start'});else window.scrollTo({top:0,left:0,behavior:'instant'});
- document.title=({home:'홈',explore:'공고 탐색',calendar:'캘린더',simulation:'교환활동 시뮬레이션'}[currentView])+' · 숭실대학교 공고 모아보기';
+ document.title=({home:'홈',explore:'공고 탐색',calendar:'캘린더',simulation:'시뮬레이션'}[currentView])+' · 숭실대학교 공고 모아보기';
  if(currentView==='calendar'){renderCalendar();loadCalendar();loadCalendarPredictions();}
 }
 window.addEventListener('hashchange',switchView);
@@ -269,9 +269,22 @@ let calendarMode='deadline',seniorPersona=window.SSUSeniors.personas[0].id,senio
 function calendarDisplayEvents(){if(calendarMode==='senior')return window.SSUSeniors.events(seniorPersona,seniorCategory);return [...calendarEvents,...($('calendar-predictions-toggle').checked?(calendarPredictionCache.get(calendarMonth)||[]):[])].sort((a,b)=>a.date.localeCompare(b.date)||Number(!!a.synthetic)-Number(!!b.synthetic));}
 function openCalendarEvent(event){if(event.senior){seniorDetail(event);return;}if(event.synthetic)predictionDetail(event.prediction);else detail(event.noticeId);}
 function predictionDetail(p){
- const box=$('detail-content');box.replaceChildren();const h=el('h2','detail-title',p.title);h.id='detail-title';box.append(h,el('span','prediction-badge','AI 예상 공고 · 합성 데이터'),el('p','prediction-disclaimer','실제 게시 공고나 확정 마감일이 아닙니다. 데이터가 부족한 상태에서 만든 합성 시나리오입니다.'));
- const summary=section('예상 공고 내용');summary.append(el('p','',p.summary));box.append(summary);const date=section('캘린더 표시일');date.append(el('p','',p.date.replace(/-/g,'.')+' · 합성 데이터 배정일'),el('p','muted','실제 학교 일정에서 확인한 날짜가 아닙니다.'));box.append(date);const reason=section('생성 설명');reason.append(el('p','',p.reason));box.append(reason,el('p','detail-footnote','AI 생성 정보는 실제 공고 수와 홈 마감 날씨에 포함되지 않습니다.'));if(!$('detail').open)$('detail').showModal();$('detail').scrollTop=0;
+ const forecast=p.data_origin==='historical_forecast';
+ const box=$('detail-content');box.replaceChildren();const h=el('h2','detail-title',p.title);h.id='detail-title';
+ box.append(h,el('span','prediction-badge',forecast?'AI 예상 공고 · 작년 공고 기반':'AI 예상 공고 · 합성 데이터'),el('p','prediction-disclaimer',forecast?'작년 공고를 바탕으로 예상한 지원 기회입니다. 올해 실제 모집 여부와 마감일은 학교 공고에서 확인해 주세요.':'실제 게시 공고나 확정 마감일이 아닙니다.'));
+ const summary=section('예상 공고 내용');summary.append(el('p','',p.summary));box.append(summary);
+ const date=section(forecast?'예상 마감 기간':'캘린더 표시일');
+ date.append(el('p','',forecast?p.expected_from.replace(/-/g,'.')+' ~ '+p.expected_to.replace(/-/g,'.'):p.date.replace(/-/g,'.')+' · 합성 데이터 배정일'),el('p','muted',forecast?'달력은 작년 마감일의 1년 뒤를 기준일로 표시합니다. ±7일은 표시를 위한 추정 범위이며 통계적으로 검증한 구간이 아닙니다.':'실제 학교 일정에서 확인한 날짜가 아닙니다.'));box.append(date);
+ if(forecast&&p.date<window.SSUCalendar.seoulDate())box.append(el('p','review-note','이미 지난 날짜의 추정입니다. 사전에 검증한 예측 결과가 아닙니다.'));
+ const reason=section(forecast?'예측 근거':'생성 설명');reason.append(el('p','',p.reason));box.append(reason);
+ if(forecast){
+  const prep=section('미리 준비할 것');prep.append(el('p','',p.preparation));box.append(prep);
+  const proof=section('작년 원문');proof.append(el('strong','',p.evidence.title),el('p','muted','게시일 '+p.evidence.published_date+' · 당시 마감일 '+p.evidence.deadline),el('blockquote','',p.evidence.quote));
+  const link=el('a','primary original-link','작년 학교 공고 보기');link.href=p.evidence.url;link.target='_blank';link.rel='noopener noreferrer';proof.append(link);box.append(proof);
+ }
+ box.append(el('p','detail-footnote','AI 예상 공고는 실제 공고 수와 홈 마감 날씨에 포함되지 않습니다.'));if(!$('detail').open)$('detail').showModal();$('detail').scrollTop=0;
 }
+
 function showCalendarDay(date,events){
  $('calendar-day-title').textContent=date.replace(/-/g,'.')+(calendarMode==='senior'?' 준비 기록':' 마감 공고');
  const list=$('calendar-day-events');list.replaceChildren();

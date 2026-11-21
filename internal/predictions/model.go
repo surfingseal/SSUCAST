@@ -28,23 +28,27 @@ type Item struct {
 	Reason   string `json:"reason"`
 }
 type Prediction struct {
-	ID            string    `json:"id" bson:"_id"`
-	RunID         string    `json:"run_id" bson:"run_id"`
-	Title         string    `json:"title" bson:"title"`
-	Category      string    `json:"category" bson:"category"`
-	Summary       string    `json:"summary" bson:"summary"`
-	Reason        string    `json:"reason" bson:"reason"`
-	Date          string    `json:"date" bson:"date"`
-	DataOrigin    string    `json:"data_origin" bson:"data_origin"`
-	DateOrigin    string    `json:"date_origin" bson:"date_origin"`
-	EventType     string    `json:"event_type" bson:"event_type"`
-	Timezone      string    `json:"timezone" bson:"timezone"`
-	HorizonFrom   string    `json:"horizon_from" bson:"horizon_from"`
-	HorizonTo     string    `json:"horizon_to" bson:"horizon_to"`
-	ModelVersion  string    `json:"model_version" bson:"model_version"`
-	PromptVersion string    `json:"prompt_version" bson:"prompt_version"`
-	GeneratedAt   time.Time `json:"generated_at" bson:"generated_at"`
-	PayloadHash   string    `json:"-" bson:"payload_hash"`
+	ExpectedFrom  string            `json:"expected_from,omitempty" bson:"expected_from,omitempty"`
+	ExpectedTo    string            `json:"expected_to,omitempty" bson:"expected_to,omitempty"`
+	Preparation   string            `json:"preparation,omitempty" bson:"preparation,omitempty"`
+	Evidence      *ForecastEvidence `json:"evidence,omitempty" bson:"evidence,omitempty"`
+	ID            string            `json:"id" bson:"_id"`
+	RunID         string            `json:"run_id" bson:"run_id"`
+	Title         string            `json:"title" bson:"title"`
+	Category      string            `json:"category" bson:"category"`
+	Summary       string            `json:"summary" bson:"summary"`
+	Reason        string            `json:"reason" bson:"reason"`
+	Date          string            `json:"date" bson:"date"`
+	DataOrigin    string            `json:"data_origin" bson:"data_origin"`
+	DateOrigin    string            `json:"date_origin" bson:"date_origin"`
+	EventType     string            `json:"event_type" bson:"event_type"`
+	Timezone      string            `json:"timezone" bson:"timezone"`
+	HorizonFrom   string            `json:"horizon_from" bson:"horizon_from"`
+	HorizonTo     string            `json:"horizon_to" bson:"horizon_to"`
+	ModelVersion  string            `json:"model_version" bson:"model_version"`
+	PromptVersion string            `json:"prompt_version" bson:"prompt_version"`
+	GeneratedAt   time.Time         `json:"generated_at" bson:"generated_at"`
+	PayloadHash   string            `json:"-" bson:"payload_hash"`
 }
 
 func Hash(v any) string { b, _ := json.Marshal(v); return fmt.Sprintf("%x", sha256.Sum256(b)) }
@@ -114,6 +118,9 @@ func Build(run string, from, to string, slots []Slot, items []Item, at time.Time
 }
 func Digest(p Prediction) string { p.PayloadHash = ""; return Hash(p) }
 func Validate(p Prediction) error {
+	if p.DataOrigin == ForecastOrigin {
+		return validateForecast(p)
+	}
 	date, e := ParseDate(p.Date)
 	if e != nil {
 		return e

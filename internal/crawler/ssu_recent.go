@@ -54,8 +54,18 @@ type SSURecentReport struct {
 }
 
 func PreviewSSURecent(s model.Source, now time.Time) (SSURecentReport, error) {
+	return PreviewSSURange(s, now, nil)
+}
+
+func PreviewSSURange(s model.Source, now time.Time, bounds *SSUCollectionRange) (SSURecentReport, error) {
 	from, to := SSURecentRange(now)
-	r := SSURecentReport{Source: s.Name, Mode: "preview", ExecutedAt: to, DateFrom: from, DateTo: to, Status: "preview_no_http_no_database", Categories: map[string]*SSUCategoryReport{}}
+	if bounds != nil {
+		if err := bounds.Validate(now); err != nil {
+			return SSURecentReport{}, err
+		}
+		from, to = bounds.From, bounds.To.AddDate(0, 0, 1).Add(-time.Nanosecond)
+	}
+	r := SSURecentReport{Source: s.Name, Mode: "preview", ExecutedAt: now, DateFrom: from, DateTo: to, Status: "preview_no_http_no_database", Categories: map[string]*SSUCategoryReport{}}
 	for _, spec := range SSUOfficialCategories {
 		u, e := SSUCategoryURL(s.BaseURL, spec)
 		if e != nil {
@@ -125,14 +135,16 @@ func parseRecentPage(raw []byte, base string, pinned func(*goquery.Selection) bo
 			return
 		}
 
-		if len(bounds) == 2 {
+		if len(bounds) >= 2 {
 			if date.Before(bounds[0]) {
 				p.OldCount++
 				return
 			}
 			if date.After(bounds[1]) {
 				p.FutureCount++
-				p.Issues = append(p.Issues, SSUReviewIssue{identity, "future_date", "published date after execution time"})
+				if len(bounds) == 2 || date.After(bounds[2]) {
+					p.Issues = append(p.Issues, SSUReviewIssue{identity, "future_date", "published date after execution time"})
+				}
 				return
 			}
 		}
@@ -202,7 +214,7 @@ func (c *SSUCatchCrawler) crawlRecent(ctx context.Context, s model.Source) (item
 	if c.Now != nil {
 		now = c.Now()
 	}
-	r, err := PreviewSSURecent(s, now)
+	r, err := PreviewSSURange(s, now, c.CollectionRange)
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +327,11 @@ func (c *SSUCatchCrawler) crawlRecent(ctx context.Context, s model.Source) (item
 					return items, e
 				}
 			}
-			p, e := parseRecentPage(response.Body, response.URL, c.RecentPinned, r.DateFrom, r.DateTo)
+			bounds := []time.Time{r.DateFrom, r.DateTo}
+			if c.CollectionRange != nil {
+				bounds = append(bounds, now)
+			}
+			p, e := parseRecentPage(response.Body, response.URL, c.RecentPinned, bounds...)
 			if e != nil {
 				stats.StopReason = "list_schema"
 				return items, e

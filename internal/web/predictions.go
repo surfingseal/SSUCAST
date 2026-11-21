@@ -29,8 +29,8 @@ func (s *Server) predictionAPI(w http.ResponseWriter, r *http.Request) {
 		if e == nil {
 			to, e = predictions.ParseDate(q.Get("to"))
 		}
-		if e != nil || to.Before(from) || to.Sub(from) > 100*24*time.Hour || from.Year() < 1970 || to.Year() > 2100 {
-			send(w, 400, map[string]string{"error": "유효한 from/to 날짜와 100일 이내 범위가 필요합니다"})
+		if e != nil || to.Before(from) || to.Sub(from) > 123*24*time.Hour || from.Year() < 1970 || to.Year() > 2100 {
+			send(w, 400, map[string]string{"error": "유효한 from/to 날짜와 124일 이내 범위가 필요합니다"})
 			return
 		}
 	}
@@ -44,5 +44,5 @@ func (s *Server) predictionAPI(w http.ResponseWriter, r *http.Request) {
 		s.failure(w, e)
 		return
 	}
-	send(w, 200, map[string]any{"items": items, "from": from.Format("2006-01-02"), "to": to.Format("2006-01-02"), "data_origin": "synthetic", "disclaimer": "AI가 생성한 합성 예상 공고이며 실제 게시 공고나 확정 마감일이 아닙니다."})
+	send(w, 200, map[string]any{"items": items, "from": from.Format("2006-01-02"), "to": to.Format("2006-01-02"), "data_origin": "ai_prediction", "disclaimer": "AI 예상 공고는 확정 모집 일정이 아닙니다. 각 공고의 근거와 예상 기간을 확인해 주세요."})
 }

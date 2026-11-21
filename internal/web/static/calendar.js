@@ -30,8 +30,12 @@
   return [...by.values()].sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'24:00').localeCompare(b.time||'24:00')||a.title.localeCompare(b.title,'ko'));
  }
  function predictionEvents(rows){
-  return rows.filter(p=>p.data_origin==='synthetic'&&p.date_origin==='simulation_slot'&&p.event_type==='deadline'&&p.timezone==='Asia/Seoul'&&validDate(p.date)&&validDate(p.horizon_from)&&validDate(p.horizon_to)&&p.date>=p.horizon_from&&p.date<=p.horizon_to&&p.id&&p.title).map(p=>({noticeId:p.id,title:p.title,date:p.date,time:'',type:'prediction',category:p.category,synthetic:true,prediction:p}));
+  return rows.filter(p=>{
+   const provenance=p.data_origin==='synthetic'&&p.date_origin==='simulation_slot'||p.data_origin==='historical_forecast'&&p.date_origin==='anniversary_estimate'&&p.evidence?.id&&/^https:\/\/scatch\.ssu\.ac\.kr\//.test(p.evidence.url||'')&&validDate(p.expected_from)&&validDate(p.expected_to)&&p.expected_from<=p.date&&p.expected_to>=p.date;
+   return provenance&&p.event_type==='deadline'&&p.timezone==='Asia/Seoul'&&validDate(p.date)&&validDate(p.horizon_from)&&validDate(p.horizon_to)&&p.date>=p.horizon_from&&p.date<=p.horizon_to&&p.id&&p.title;
+  }).map(p=>({noticeId:p.id,title:p.title,date:p.date,time:'',type:'prediction',category:p.category,synthetic:true,forecast:p.data_origin==='historical_forecast',prediction:p}));
  }
+
  const api={seoulDate,validDate,monthDays,deadlineEvents,predictionEvents};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.SSUCalendar=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -30,6 +30,8 @@ type SSUCatchCrawler struct {
 	RecentPinned         func(*goquery.Selection) bool
 	RecentDetailCategory string
 	RecentItem           func(model.Content) error
+	// Optional inclusive KST publication-date range for manual archival collection.
+	CollectionRange *SSUCollectionRange
 }
 
 func ssuError(stage, raw string, err error) error {
